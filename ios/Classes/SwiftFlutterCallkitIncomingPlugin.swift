@@ -433,9 +433,11 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     }
     
     func initCallkitProvider(_ data: Data) {
-        if(self.sharedProvider == nil){
+        if (self.sharedProvider == nil) {
             self.sharedProvider = CXProvider(configuration: createConfiguration(data))
             self.sharedProvider?.setDelegate(self, queue: nil)
+        } else if (data.checkIsDataForConfigurationChange(self.sharedProvider?.configuration)) {
+            self.sharedProvider?.configuration = createConfiguration(data)
         }
         self.callManager.setSharedProvider(self.sharedProvider!)
     }
@@ -446,11 +448,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         configuration.maximumCallGroups = data.maximumCallGroups
         configuration.maximumCallsPerCallGroup = data.maximumCallsPerCallGroup
         
-        configuration.supportedHandleTypes = [
-            CXHandle.HandleType.generic,
-            CXHandle.HandleType.emailAddress,
-            CXHandle.HandleType.phoneNumber
-        ]
+        configuration.supportedHandleTypes = data.supportedHandleTypes
         if #available(iOS 11.0, *) {
             configuration.includesCallsInRecents = data.includesCallsInRecents
         }
