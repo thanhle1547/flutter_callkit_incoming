@@ -7,6 +7,7 @@
 
 import Foundation
 import AVFoundation
+import CallKit
 
 public class Call: NSObject {
     
@@ -144,6 +145,7 @@ public class Call: NSObject {
     @objc public var supportsVideo: Bool
     @objc public var maximumCallGroups: Int
     @objc public var maximumCallsPerCallGroup: Int
+    @nonobjc public var supportedHandleTypes: Set<CXHandle.HandleType>
     @objc public var supportsDTMF: Bool
     @objc public var supportsHolding: Bool
     @objc public var supportsGrouping: Bool
@@ -172,6 +174,11 @@ public class Call: NSObject {
         self.supportsVideo = true
         self.maximumCallGroups = 2
         self.maximumCallsPerCallGroup = 1
+        self.supportedHandleTypes = [
+            CXHandle.HandleType.generic,
+            CXHandle.HandleType.emailAddress,
+            CXHandle.HandleType.phoneNumber
+        ]
         self.supportsDTMF = true
         self.supportsHolding = true
         self.supportsGrouping = true
@@ -212,6 +219,14 @@ public class Call: NSObject {
             self.supportsVideo = ios["supportsVideo"] as? Bool ?? true
             self.maximumCallGroups = ios["maximumCallGroups"] as? Int ?? 2
             self.maximumCallsPerCallGroup = ios["maximumCallsPerCallGroup"] as? Int ?? 1
+            self.supportedHandleTypes = Set(
+                (ios["supportedHandleTypes"] as? Set<Int>)?.compactMap { CXHandle.HandleType(rawValue: $0) }
+                ?? [
+                    CXHandle.HandleType.generic,
+                    CXHandle.HandleType.emailAddress,
+                    CXHandle.HandleType.phoneNumber
+                ]
+            )
             self.supportsDTMF = ios["supportsDTMF"] as? Bool ?? true
             self.supportsHolding = ios["supportsHolding"] as? Bool ?? true
             self.supportsGrouping = ios["supportsGrouping"] as? Bool ?? true
@@ -229,6 +244,14 @@ public class Call: NSObject {
             self.supportsVideo = args["supportsVideo"] as? Bool ?? true
             self.maximumCallGroups = args["maximumCallGroups"] as? Int ?? 2
             self.maximumCallsPerCallGroup =  args["maximumCallsPerCallGroup"] as? Int ?? 1
+            self.supportedHandleTypes = Set(
+                (args["supportedHandleTypes"] as? Set<Int>)?.compactMap { CXHandle.HandleType(rawValue: $0) }
+                ?? [
+                    CXHandle.HandleType.generic,
+                    CXHandle.HandleType.emailAddress,
+                    CXHandle.HandleType.phoneNumber
+                ]
+            )
             self.supportsDTMF = args["supportsDTMF"] as? Bool ?? true
             self.supportsHolding = args["supportsHolding"] as? Bool ?? true
             self.supportsGrouping = args["supportsGrouping"] as? Bool ?? true
@@ -243,6 +266,25 @@ public class Call: NSObject {
         }
     }
     
+    func checkIsDataForConfigurationChange(_ configuration: CXProviderConfiguration) -> Bool {
+        if let configuration = configuration {
+            if #available(iOS 11.0, *) {
+                if (includesCallsInRecents != configuration.includesCallsInRecents) {
+                    return true
+                }
+            }
+
+            return supportsVideo != configuration.supportsVideo
+                || maximumCallGroups != configuration.maximumCallGroups
+                || maximumCallsPerCallGroup != configuration.maximumCallsPerCallGroup
+                || supportedHandleTypes.count != configuration.supportedHandleTypes.count
+                || supportedHandleTypes.intersection(configuration.supportedHandleTypes).isEmpty == false
+                || ringtonePath != configuration.ringtoneSound
+        } else {
+            return false
+        }
+    }
+    
     open func toJSON() -> [String: Any] {
         let ios: [String : Any] = [
             "iconName": iconName,
@@ -250,6 +292,7 @@ public class Call: NSObject {
             "supportsVideo": supportsVideo,
             "maximumCallGroups": maximumCallGroups,
             "maximumCallsPerCallGroup": maximumCallsPerCallGroup,
+            "supportedHandleTypes": supportedHandleTypes.map { $0.rawValue },
             "supportsDTMF": supportsDTMF,
             "supportsHolding": supportsHolding,
             "supportsGrouping": supportsGrouping,
