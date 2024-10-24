@@ -252,11 +252,15 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             self.data = data
         }
         
-        var handle: CXHandle?
-        handle = CXHandle(type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
+        let nativeHandle: CXHandle
+        if (data.phoneNumber.isEmpty) {
+            nativeHandle = CXHandle(type: .generic, value: data.getEncryptHandle())
+        } else {
+            nativeHandle = CXHandle(type: .phoneNumber, value: data.phoneNumber)
+        }
         
         let callUpdate = CXCallUpdate()
-        callUpdate.remoteHandle = handle
+        callUpdate.remoteHandle = nativeHandle
         callUpdate.supportsDTMF = data.supportsDTMF
         callUpdate.supportsHolding = data.supportsHolding
         callUpdate.supportsGrouping = data.supportsGrouping
@@ -391,20 +395,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
     }
     
-    func getHandleType(_ handleType: String?) -> CXHandle.HandleType {
-        var typeDefault = CXHandle.HandleType.generic
-        switch handleType {
-        case "number":
-            typeDefault = CXHandle.HandleType.phoneNumber
-            break
-        case "email":
-            typeDefault = CXHandle.HandleType.emailAddress
-        default:
-            typeDefault = CXHandle.HandleType.generic
-        }
-        return typeDefault
-    }
-    
     func initCallkitProvider(_ data: Data) {
         if(self.sharedProvider == nil){
             self.sharedProvider = CXProvider(configuration: createConfiguration(data))
@@ -448,7 +438,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         NotificationCenter.default.post(name: AVAudioSession.interruptionNotification, object: self, userInfo: userInfo)
     }
     
-    func configurAudioSession(){
+    func activateAudioSession(){
         if data?.configureAudioSession != false {
             let session = AVAudioSession.sharedInstance()
             do{

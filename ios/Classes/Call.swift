@@ -129,6 +129,7 @@ public class Call: NSObject {
 @objc public class Data: NSObject {
     @objc public var uuid: String
     @objc public var nameCaller: String
+    @objc public var phoneNumber: String
     @objc public var appName: String
     @objc public var handle: String
     @objc public var avatar: String
@@ -155,9 +156,10 @@ public class Call: NSObject {
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double
     
-    @objc public init(id: String, nameCaller: String, handle: String, type: Int) {
+    @objc public init(id: String, nameCaller: String, phoneNumber: String, handle: String, type: Int) {
         self.uuid = id
         self.nameCaller = nameCaller
+        self.phoneNumber = phoneNumber
         self.appName = "Callkit"
         self.handle = handle
         self.avatar = ""
@@ -194,6 +196,7 @@ public class Call: NSObject {
     public init(args: [String: Any?]) {
         self.uuid = args["id"] as? String ?? ""
         self.nameCaller = args["nameCaller"] as? String ?? ""
+        self.phoneNumber = args["phoneNumber"] as? String ?? ""
         self.appName = args["appName"] as? String ?? "Callkit"
         self.handle = args["handle"] as? String ?? ""
         self.avatar = args["avatar"] as? String ?? ""
@@ -263,6 +266,7 @@ public class Call: NSObject {
             "uuid": uuid,
             "id": uuid,
             "nameCaller": nameCaller,
+            "phoneNumber": phoneNumber,
             "appName": appName,
             "handle": handle,
             "avatar": avatar,
@@ -274,8 +278,10 @@ public class Call: NSObject {
         ]
         return map
     }
-    
+
     func getEncryptHandle() -> String {
+        print("Encrypt handle")
+
         if (normalHandle > 0) {
             return handle
         }
@@ -283,9 +289,10 @@ public class Call: NSObject {
             var map: [String: Any] = [:]
 
             map["nameCaller"] = nameCaller
+            map["phoneNumber"] = phoneNumber
             map["handle"] = handle
             
-            var mapExtras = extra as? [String: Any]
+            let mapExtras = extra as? [String: Any]
             
             if (mapExtras == nil) {
                 print("error casting dictionary to [String: Any]")

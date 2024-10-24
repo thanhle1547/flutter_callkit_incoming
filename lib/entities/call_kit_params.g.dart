@@ -10,6 +10,7 @@ CallKitParams _$CallKitParamsFromJson(Map<String, dynamic> json) =>
     CallKitParams(
       id: json['id'] as String?,
       nameCaller: json['nameCaller'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
       appName: json['appName'] as String?,
       avatar: json['avatar'] as String?,
       handle: json['handle'] as String?,
@@ -36,6 +37,7 @@ Map<String, dynamic> _$CallKitParamsToJson(CallKitParams instance) =>
     <String, dynamic>{
       'id': instance.id,
       'nameCaller': instance.nameCaller,
+      'phoneNumber': instance.phoneNumber,
       'appName': instance.appName,
       'avatar': instance.avatar,
       'handle': instance.handle,

@@ -12,6 +12,7 @@ class CallKitParams {
   const CallKitParams({
     this.id,
     this.nameCaller,
+    this.phoneNumber,
     this.appName,
     this.avatar,
     this.handle,
@@ -29,6 +30,7 @@ class CallKitParams {
 
   final String? id;
   final String? nameCaller;
+  final String? phoneNumber;
   final String? appName;
   final String? avatar;
   final String? handle;
