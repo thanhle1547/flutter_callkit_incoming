@@ -105,11 +105,31 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 result("OK")
                 return
             }
+
             if let getArgs = args as? [String: Any] {
                 self.data = Data(args: getArgs)
-                showCallkitIncoming(self.data!, fromPushKit: false)
+                showCallkitIncoming(
+                    self.data!,
+                    fromPushKit: false,
+                    completion: { error in
+                        if let error = error {
+                            print("FlutterMethodCall.showCallkitIncoming", "error \(error) |> \(String(describing: error.localizedFailureReason))")
+
+                            result(
+                                FlutterError(
+                                    code: String(error.code),
+                                    message: error.localizedDescription,
+                                    details: error.localizedFailureReason
+                                )
+                            )
+
+                            return
+                        }
+
+                        result("OK")
+                    }
+                )
             }
-            result("OK")
             break
         case "showMissCallNotification":
             result("OK")
@@ -257,7 +277,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         return nil
     }
     
-    @objc public func showCallkitIncoming(_ data: Data, fromPushKit: Bool) {
+    @objc public func showCallkitIncoming(_ data: Data, fromPushKit: Bool, completion: ((NSError?) -> Void)?) {
         self.isFromPushKit = fromPushKit
         if(fromPushKit){
             self.data = data
@@ -286,14 +306,15 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         activateAudioSession()
 
         self.sharedProvider?.reportNewIncomingCall(with: uuid!, update: callUpdate) { error in
-            if(error == nil) {
-                self.configurAudioSession()
+            if (error == nil) {
                 let call = Call(uuid: uuid!, data: data)
                 call.handle = data.handle
                 self.callManager.addCall(call)
                 self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_INCOMING, data.toJSON())
                 self.endCallNotExist(data)
             }
+
+            completion?(error as NSError?)
         }
     }
     
