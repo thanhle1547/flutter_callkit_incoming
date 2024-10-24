@@ -1,3 +1,12 @@
+## 2.1.0
+* Invoke `showCallkitIncoming` from Flutter can throw error (iOS)
+* Deactivate Audio Session on end call & call end timeout (iOS)
+* Add `isAvailable` to `SwiftFlutterCallkitIncomingPlugin` (iOS)
+* Fix: `endCall` and `callConnected` override data
+* [BREAKING CHANGES]
+    * Add Add `completion` argument to `showCallkitIncoming` (iOS)
+    * Add `phoneNumber` to `Data`
+
 ## 2.0.4+2
 * add func `requestFullIntentPermission` (Android 14+) thank @Spyspyspy https://github.com/hiennguyen92/flutter_callkit_incoming/pull/584
 * set Notification call style (Android) thank @AAkira https://github.com/hiennguyen92/flutter_callkit_incoming/pull/553
