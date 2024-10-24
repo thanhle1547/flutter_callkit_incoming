@@ -1,3 +1,7 @@
+## 2.2.0
+* Add `supportedHandleTypes` to `Data` to able to hide the app from recommendations on contact info (iOS)
+* Update CXProvider.configuration on data changed (iOS)
+
 ## 2.1.0
 * Invoke `showCallkitIncoming` from Flutter can throw error (iOS)
 * Deactivate Audio Session on end call & call end timeout (iOS)
