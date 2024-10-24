@@ -340,6 +340,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             call = Call(uuid: UUID(uuidString: data.uuid)!, data: data)
         }
         self.callManager.endCall(call: call!)
+        
+        deactivateAudioSession()
     }
     
     @objc public func connectedCall(_ data: Data) {
@@ -405,6 +407,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
             appDelegate.onTimeOut(call)
         }
+        
+        deactivateAudioSession()
     }
     
     func initCallkitProvider(_ data: Data) {
@@ -472,6 +476,20 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     func reactivateAudioSession() {
         return activateAudioSession()
+    }
+    
+    func deactivateAudioSession() {
+        if data?.configureAudioSession != false {
+            let session = AVAudioSession.sharedInstance()
+            do {
+                try session.setActive(
+                    false,
+                    options: AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation
+                )
+            } catch {
+                print(error)
+            }
+        }
     }
     
     func getAudioSessionMode(_ audioSessionMode: String?) -> AVAudioSession.Mode {
