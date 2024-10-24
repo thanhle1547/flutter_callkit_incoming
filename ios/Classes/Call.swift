@@ -266,7 +266,7 @@ public class Call: NSObject {
         }
     }
     
-    func checkIsDataForConfigurationChange(_ configuration: CXProviderConfiguration) -> Bool {
+    func checkIsDataForConfigurationChange(_ configuration: CXProviderConfiguration?) -> Bool {
         if let configuration = configuration {
             if #available(iOS 11.0, *) {
                 if (includesCallsInRecents != configuration.includesCallsInRecents) {
