@@ -1,3 +1,6 @@
+## 2.2.1
+* Fix: configuration argument of `Call.checkIsDataForConfigurationChange()` method is not Optional type (iOS)
+
 ## 2.2.0
 * Add `supportedHandleTypes` to `Data` to able to hide the app from recommendations on contact info (iOS)
 * Update CXProvider.configuration on data changed (iOS)
