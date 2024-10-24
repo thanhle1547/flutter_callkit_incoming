@@ -119,12 +119,18 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 result("OK")
                 return
             }
-            if(self.isFromPushKit){
+            if (self.isFromPushKit) {
                 self.endCall(self.data!)
-            }else{
+            } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = Data(args: getArgs)
+                    let id = getArgs["id"] as? String
+                    if let id = id {
+                        self.data?.uuid = id
+                    }
+
                     self.endCall(self.data!)
+                } else if let data = data {
+                    self.endCall(data)
                 }
             }
             result("OK")
@@ -168,12 +174,18 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 result("OK")
                 return
             }
-            if(self.isFromPushKit){
+            if (self.isFromPushKit) {
                 self.connectedCall(self.data!)
-            }else{
+            } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = Data(args: getArgs)
+                    let id = getArgs["id"] as? String
+                    if let id = id {
+                        self.data?.uuid = id
+                    }
+
                     self.connectedCall(self.data!)
+                } else if let data = data {
+                    self.connectedCall(data)
                 }
             }
             result("OK")
