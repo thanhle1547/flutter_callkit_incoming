@@ -38,6 +38,17 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     private var silenceEvents: Bool = false
     private let devicePushTokenVoIP = "DevicePushTokenVoIP"
 
+    public static var isAvailable: Bool {
+        #if targetEnvironment(simulator)
+        return false
+        #else
+        if #available(iOSApplicationExtension 10.0, iOS 10.0, *) {
+            return true
+        } else {
+            return false
+        }
+        #endif
+    }
     
     private func sendEvent(_ event: String, _ body: [String : Any?]?) {
         if silenceEvents {
