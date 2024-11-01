@@ -1,3 +1,6 @@
+## 2.2.2
+* Fix: Unexpectedly found nil while unwrapping on Optional value in `SwiftFlutterCallkitIncomingPlugin.endCall(_:)` (iOS)
+
 ## 2.2.1
 * Fix: configuration argument of `Call.checkIsDataForConfigurationChange()` method is not Optional type (iOS)
 
