@@ -150,21 +150,54 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 result("OK")
                 return
             }
+            
+            var errorDetails: String? = nil
+
             if (self.isFromPushKit) {
-                self.endCall(self.data!)
+                errorDetails = "from PushKit"
             } else {
                 if let getArgs = args as? [String: Any] {
                     let id = getArgs["id"] as? String
                     if let id = id {
                         self.data?.uuid = id
                     }
-
-                    self.endCall(self.data!)
-                } else if let data = data {
-                    self.endCall(data)
                 }
             }
-            result("OK")
+            
+            if let data = data {
+                do {
+                    try self.endCall(data)
+                    result("OK")
+                } catch InvalidError.uuid {
+                    result(
+                        FlutterError(
+                            code: "invalid_error",
+                            message: "Invalid UUID",
+                            details: errorDetails
+                        )
+                    )
+                } catch {
+                    // exhaustive
+                    print("Unexpected error: \(error)")
+                    result(
+                        FlutterError(
+                            code: "unknown_error",
+                            message: String(describing: error),
+                            details: errorDetails
+                        )
+                    )
+                }
+            } else {
+                result(
+                    FlutterError(
+                        code: "no_data",
+                        message: "No data",
+                        details: errorDetails
+                    )
+                )
+                return
+            }
+
             break
         case "muteCall":
             guard let args = call.arguments as? [String: Any] ,
@@ -352,15 +385,27 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     }
     
     @objc public func endCall(_ data: Data) {
-        var call: Call? = nil
-        if(self.isFromPushKit){
-            call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
+        var uuid: UUID? = nil
+
+        if (self.isFromPushKit) {
+            uuid = UUID(uuidString: self.data?.uuid ?? data.uuid)
+        } else {
+            uuid = UUID(uuidString: data.uuid)
+        }
+
+        guard uuid != nil else {
+            deactivateAudioSession()
+            throw InvalidError.uuid
+        }
+        
+        let call = Call(uuid: uuid!, data: data)
+        
+        if (self.isFromPushKit) {
             self.isFromPushKit = false
             self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, data.toJSON())
-        }else {
-            call = Call(uuid: UUID(uuidString: data.uuid)!, data: data)
         }
-        self.callManager.endCall(call: call!)
+
+        self.callManager.endCall(call: call)
         
         deactivateAudioSession()
     }
@@ -767,4 +812,8 @@ class EventCallbackHandler: NSObject, FlutterStreamHandler {
         self.eventSink = nil
         return nil
     }
+}
+
+@objc public enum InvalidError: Int, Error {
+    case uuid
 }
