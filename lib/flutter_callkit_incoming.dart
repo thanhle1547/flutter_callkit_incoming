@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/services.dart';
 
@@ -146,6 +147,9 @@ class FlutterCallkitIncoming {
     if (data is Map) {
       event = Event.values.firstWhere((e) => e.name == data['event']);
       body = Map<String, dynamic>.from(data['body']);
+
+      // log("$event ${body['id']}}", name: 'FlutterCallkitIncoming event');
+
       return CallEvent(body, event);
     }
     return null;
