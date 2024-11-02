@@ -1,3 +1,6 @@
+## 2.3.0
+* Add `pushKitIncomingCall` event (iOS)
+
 ## 2.2.3
 * Fix [(2.2.2)](#2-2-2): Error is not handled because the enclosing function is not declared 'throws' (iOS)
 
