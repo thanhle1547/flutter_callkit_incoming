@@ -1,3 +1,7 @@
+## 2.4.0
+* Public uuid (iOS)
+* Add `reportCallEnd` which call `CXProvider.reportCall(with:endedAt:reason: .remoteEnded)` (iOS)
+
 ## 2.3.0
 * Add `pushKitIncomingCall` event (iOS)
 
