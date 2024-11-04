@@ -269,6 +269,17 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             self.callManager.endCallAlls()
             result("OK")
             break
+        case "reportCallEnd":
+            guard let args = call.arguments as? [String: Any],
+                  let uuid = args["uuid"] as? String? else {
+                result("OK")
+                return
+            }
+
+            result(
+                self.reportCallEnd(uuid)
+            )
+            break;
         case "getDevicePushTokenVoIP":
             result(self.getDevicePushTokenVoIP())
             break;
@@ -490,6 +501,17 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
         
         deactivateAudioSession()
+    }
+    
+    public func reportCallEnd(_ uuid: String?) -> Bool {
+        let effectiveUuid = uuid ?? self.data?.uuid
+        
+        if effectiveUuid != nil {
+            self.saveEndCall(effectiveUuid!, 2)
+            return true
+        } else {
+            return false
+        }
     }
     
     func initCallkitProvider(_ data: Data) {
