@@ -1,7 +1,6 @@
 package com.hiennv.flutter_callkit_incoming
 
 import android.app.Activity
-import android.app.ActivityManager
 import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,7 +12,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
+import android.text.TextUtils
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
@@ -21,15 +23,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout
+import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlin.math.abs
 import okhttp3.OkHttpClient
-import com.squareup.picasso.OkHttp3Downloader
-import android.view.ViewGroup.MarginLayoutParams
-import android.os.PowerManager
-import android.text.TextUtils
-import android.util.Log
+import kotlin.math.abs
 
 
 class CallkitIncomingActivity : Activity() {
@@ -120,7 +118,16 @@ class CallkitIncomingActivity : Activity() {
 
         val pm = applicationContext.getSystemService(POWER_SERVICE) as PowerManager
         val wakeLock = pm.newWakeLock(
-                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                // PowerManager.SCREEN_BRIGHT_WAKE_LOCK // deprecated in API level 15
+                // PowerManager.FULL_WAKE_LOCK // deprecated in API level 17
+                // PowerManager.ACQUIRE_CAUSES_WAKEUP // ACQUIRE_CAUSES_WAKEUP can't be used with PARTIAL_WAKE_LOCK
+
+                // Ensures that the CPU is running;
+                // the screen and keyboard backlight will be allowed to go off.
+                //
+                // If the user presses the power button, then the screen will be turned off
+                // but the CPU will be kept on until all partial wake locks have been released.
+                PowerManager.PARTIAL_WAKE_LOCK,
                 "Callkit:PowerManager"
         )
         wakeLock.acquire(duration)
