@@ -103,6 +103,8 @@ class CallkitNotificationManager(private val context: Context) {
             ),
         )
 
+        val pendingIntent = getActivityPendingIntent(notificationId, data)
+
         notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_INCOMING)
         notificationBuilder.setAutoCancel(false)
         notificationBuilder.setChannelId(NOTIFICATION_CHANNEL_ID_INCOMING)
@@ -123,12 +125,12 @@ class CallkitNotificationManager(private val context: Context) {
         notificationBuilder.setOnlyAlertOnce(true)
         notificationBuilder.setSound(null)
         notificationBuilder.setFullScreenIntent(
-            getActivityPendingIntent(notificationId, data), true
+            pendingIntent, true
         )
-        notificationBuilder.setContentIntent(getActivityPendingIntent(notificationId, data))
+        notificationBuilder.setContentIntent(pendingIntent)
         notificationBuilder.setDeleteIntent(getTimeOutPendingIntent(notificationId, data))
         val typeCall = data.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)
-        var smallIcon = context.applicationInfo.icon
+        var smallIcon = context.applicationInfo.icon // drawable resource identifier (in the package's resources)
         if (typeCall > 0) {
             smallIcon = R.drawable.ic_video
         } else {
@@ -230,8 +232,8 @@ class CallkitNotificationManager(private val context: Context) {
             R.id.tvNameCaller,
             data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
         )
-        val isShowCallID = data?.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
-        if (isShowCallID == true) {
+        val isShowCallID = data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
+        if (isShowCallID) {
             remoteViews.setTextViewText(
                 R.id.tvNumber,
                 data.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, "")

@@ -37,10 +37,15 @@ class CallkitIncomingActivity : Activity() {
         private const val ACTION_ENDED_CALL_INCOMING =
                 "com.hiennv.flutter_callkit_incoming.ACTION_ENDED_CALL_INCOMING"
 
-        fun getIntent(context: Context, data: Bundle) = Intent(CallkitConstants.ACTION_CALL_INCOMING).apply {
-            action = "${context.packageName}.${CallkitConstants.ACTION_CALL_INCOMING}"
-            putExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA, data)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        fun getIntent(context: Context, data: Bundle) : Intent {
+            val packageName = context.packageName
+            val intent = Intent(context, CallkitIncomingActivity::class.java).apply {
+                action = "$packageName.${CallkitConstants.ACTION_CALL_INCOMING}"
+                putExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA, data)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+
+            return intent
         }
 
         fun getIntentEnded(context: Context, isAccepted: Boolean): Intent {
