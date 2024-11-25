@@ -1,3 +1,9 @@
+## 2.5.0
+* Using PowerManager.PARTIAL_WAKE_LOCK to wake app (Android)
+* Remove unused dependency: localbroadcastmanager (Android)
+* Fix CallkitIncomingActivity did not show & tab on notification restart the app (Android)
+* Public activateAudioSession() & deactivateAudioSession() methods (iOS)
+
 ## 2.4.0
 * Public uuid (iOS)
 * Add `reportCallEnd` which call `CXProvider.reportCall(with:endedAt:reason: .remoteEnded)` (iOS)
