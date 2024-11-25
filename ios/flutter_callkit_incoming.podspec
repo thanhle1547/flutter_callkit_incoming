@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_callkit_incoming'
-  s.version          = '0.4.0'
+  s.version          = '0.5.0'
   s.summary          = 'Flutter Callkit Incoming'
   s.description      = <<-DESC
 Flutter Callkit Incoming
