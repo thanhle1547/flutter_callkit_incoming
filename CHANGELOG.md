@@ -1,8 +1,20 @@
+## 2.5.2
+* Add notification calling for Android `callingNotification`, thank @ebsangam https://github.com/hiennguyen92/flutter_callkit_incoming/pull/662
+* Add `logoUrl` properties (inside android prop) 
+* Fixed issue DMTF IOS, thank @minn-ee https://github.com/hiennguyen92/flutter_callkit_incoming/issues/577
+* Fixed issue duplicate missing notification Android
+* Fixed some bugs.
+
+## 2.5.1
+* Fix issue security Android, thanks @datpt11 https://github.com/hiennguyen92/flutter_callkit_incoming/issues/651
+
 ## 2.5.0
 * Using PowerManager.PARTIAL_WAKE_LOCK to wake app (Android)
 * Remove unused dependency: localbroadcastmanager (Android)
 * Fix CallkitIncomingActivity did not show & tab on notification restart the app (Android)
 * Public activateAudioSession() & deactivateAudioSession() methods (iOS)
+
+* update jvmToolchain(17) for Android
 
 ## 2.4.0
 * Public uuid (iOS)
@@ -38,7 +50,6 @@
 * set Notification call style (Android) thank @AAkira https://github.com/hiennguyen92/flutter_callkit_incoming/pull/553
 * Many other issues
     1. add prop `accepted` in activeCalls (iOS) thank @vasilich6107
-    2. 
 
 ## 2.0.4+1
 * Removed `Telecom Framework` (Android)

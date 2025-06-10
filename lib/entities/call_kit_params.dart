@@ -22,6 +22,7 @@ class CallKitParams {
     this.textAccept,
     this.textDecline,
     this.missedCallNotification,
+    this.callingNotification,
     this.extra,
     this.headers,
     this.android,
@@ -40,6 +41,7 @@ class CallKitParams {
   final String? textAccept;
   final String? textDecline;
   final NotificationParams? missedCallNotification;
+  final NotificationParams? callingNotification;
   final Map<String, dynamic>? extra;
   final Map<String, dynamic>? headers;
   final AndroidParams? android;
