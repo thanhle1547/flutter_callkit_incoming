@@ -1,3 +1,38 @@
+## 2.5.8
+* Fix OnGoing notification Android
+* Add missed call notification for iOS(notification/callback action - need to setup more in AppDelegate.swift)
+* Add `requestNotificationPermission` for iOS
+
+## 2.5.7
+* Fix build Android
+* Fix stop sound notification when screen off Android
+
+## 2.5.6
+* Fix bug duplicate permission Android
+* Replaces MediaPlayer with Ringtone Android
+* Fix bug notification channel Android
+* Stop sound notification when screen off Android
+
+## 2.5.5
+* Fix bug duplicate permission Android
+
+## 2.5.4
+* Fix bug custom permission Android
+* Remove calling notification when task remove
+* Fixed calling notification show
+* Fixed some bugs.
+
+## 2.5.3
+* Update Android 14+ compatibility(force CallStyle/`FOREGROUND_SERVICE_PHONE_CALL` for https://developer.android.com/about/versions/14/behavior-changes-all#non-dismissable-notifications)
+* Change structure Notification/Sound on Android
+* Update get avatar from assets(Android), thanks @Ricky-yu https://github.com/hiennguyen92/flutter_callkit_incoming/pull/674
+* Add `isAccepted` properties for iOS and only show facetime button if support video, thank @td2thinh https://github.com/hiennguyen92/flutter_callkit_incoming/pull/673
+* Fixed some bugs.
+
+## 2.5.3-alpha
+* Update Android 14+ compatibility(force CallStyle/`FOREGROUND_SERVICE_PHONE_CALL` for https://developer.android.com/about/versions/14/behavior-changes-all#non-dismissable-notifications)
+* Fixed some bugs.
+
 ## 2.5.2
 * Add notification calling for Android `callingNotification`, thank @ebsangam https://github.com/hiennguyen92/flutter_callkit_incoming/pull/662
 * Add `logoUrl` properties (inside android prop) 

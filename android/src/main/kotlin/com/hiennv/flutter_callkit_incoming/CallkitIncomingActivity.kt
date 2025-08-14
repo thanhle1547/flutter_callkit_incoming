@@ -23,12 +23,12 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout
-import com.squareup.picasso.OkHttp3Downloader
-import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
-import okhttp3.OkHttpClient
 import kotlin.math.abs
-
+import android.view.ViewGroup.MarginLayoutParams
+import android.os.PowerManager
+import android.text.TextUtils
+import android.util.Log
 
 class CallkitIncomingActivity : Activity() {
 
@@ -203,29 +203,24 @@ class CallkitIncomingActivity : Activity() {
         val isShowLogo = data?.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_LOGO, false)
         ivLogo.visibility = if (isShowLogo == true) View.VISIBLE else View.INVISIBLE
         var logoUrl = data?.getString(CallkitConstants.EXTRA_CALLKIT_LOGO_URL, "")
-        if (logoUrl != null && logoUrl.isNotEmpty()) {
+        if (!logoUrl.isNullOrEmpty()) {
             if (!logoUrl.startsWith("http://", true) && !logoUrl.startsWith("https://", true)) {
                 logoUrl = String.format("file:///android_asset/flutter_assets/%s", logoUrl)
             }
             val headers =
                 data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
-            getPicassoInstance(this@CallkitIncomingActivity, headers)
-                .load(logoUrl)
-                .placeholder(R.drawable.transparent)
-                .error(R.drawable.transparent)
-                .into(ivLogo)
+            ImageLoaderProvider.loadImage(this@CallkitIncomingActivity, logoUrl, headers, R.drawable.transparent, ivLogo)
         }
 
-        val avatarUrl = data?.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
-        if (avatarUrl != null && avatarUrl.isNotEmpty()) {
+        var avatarUrl = data?.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+        if (!avatarUrl.isNullOrEmpty()) {
             ivAvatar.visibility = View.VISIBLE
+            if (!avatarUrl.startsWith("http://", true) && !avatarUrl.startsWith("https://", true)) {
+                avatarUrl = String.format("file:///android_asset/flutter_assets/%s", avatarUrl)
+            }
             val headers =
-                data.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
-            getPicassoInstance(this@CallkitIncomingActivity, headers)
-                .load(avatarUrl)
-                .placeholder(R.drawable.ic_default_avatar)
-                .error(R.drawable.ic_default_avatar)
-                .into(ivAvatar)
+                data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
+            ImageLoaderProvider.loadImage(this@CallkitIncomingActivity, avatarUrl, headers, R.drawable.ic_default_avatar, ivAvatar)
         }
 
         val callType = data?.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, 0) ?: 0
@@ -257,7 +252,7 @@ class CallkitIncomingActivity : Activity() {
         } catch (error: Exception) {
         }
         var backgroundUrl = data?.getString(CallkitConstants.EXTRA_CALLKIT_BACKGROUND_URL, "")
-        if (backgroundUrl != null && backgroundUrl.isNotEmpty()) {
+        if (!backgroundUrl.isNullOrEmpty()) {
             if (!backgroundUrl.startsWith("http://", true) && !backgroundUrl.startsWith(
                     "https://",
                     true
@@ -268,11 +263,7 @@ class CallkitIncomingActivity : Activity() {
             }
             val headers =
                 data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
-            getPicassoInstance(this@CallkitIncomingActivity, headers)
-                .load(backgroundUrl)
-                .placeholder(R.drawable.transparent)
-                .error(R.drawable.transparent)
-                .into(ivBackground)
+            ImageLoaderProvider.loadImage(this@CallkitIncomingActivity, backgroundUrl, headers, R.drawable.transparent, ivBackground)
         }
     }
 
@@ -331,6 +322,15 @@ class CallkitIncomingActivity : Activity() {
 
     private fun onAcceptClick() {
         val data = intent.extras?.getBundle(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
+
+
+        CallkitNotificationService.startServiceWithAction(
+            this@CallkitIncomingActivity,
+            CallkitConstants.ACTION_CALL_ACCEPT,
+            data
+        )
+
+
         val acceptIntent =
             TransparentActivity.getIntent(this, CallkitConstants.ACTION_CALL_ACCEPT, data)
         startActivity(acceptIntent)
@@ -348,6 +348,7 @@ class CallkitIncomingActivity : Activity() {
 
     private fun onDeclineClick() {
         val data = intent.extras?.getBundle(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
+
         val intent =
             CallkitIncomingBroadcastReceiver.getIntentDecline(this@CallkitIncomingActivity, data)
         sendBroadcast(intent)
@@ -366,21 +367,6 @@ class CallkitIncomingActivity : Activity() {
         } else {
             finish()
         }
-    }
-
-    private fun getPicassoInstance(context: Context, headers: HashMap<String, Any?>): Picasso {
-        val client = OkHttpClient.Builder()
-            .addNetworkInterceptor { chain ->
-                val newRequestBuilder: okhttp3.Request.Builder = chain.request().newBuilder()
-                for ((key, value) in headers) {
-                    newRequestBuilder.addHeader(key, value.toString())
-                }
-                chain.proceed(newRequestBuilder.build())
-            }
-            .build()
-        return Picasso.Builder(context)
-            .downloader(OkHttp3Downloader(client))
-            .build()
     }
 
     override fun onDestroy() {
