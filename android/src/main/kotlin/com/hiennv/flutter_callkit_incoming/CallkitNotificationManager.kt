@@ -1024,10 +1024,14 @@ class CallkitNotificationManager(
     }
 
     fun requestFullIntentPermission(activity: Activity?) {
-        val canUseFullScreenIntent = getNotificationManager().canUseFullScreenIntent()
+        val canUseFullScreenIntent = canUseFullScreenIntent()
         if (!canUseFullScreenIntent && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
-                data = Uri.fromParts("package", activity?.packageName, null)
+                data = Uri.fromParts(
+                        /* scheme */ "package",
+                        activity?.packageName,
+                        /* fragment */ null
+                )
             }
             activity?.startActivity(intent)
         }
