@@ -113,7 +113,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         switch call.method {
         case "showCallkitIncoming":
             guard let args = call.arguments else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "missing_arguments",
+                        message: "Missing arguments",
+                        details: nil
+                    )
+                )
                 return
             }
 
@@ -141,34 +147,74 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                     }
                 )
             } else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
             }
             break
         case "showMissCallNotification":
             guard let args = call.arguments else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "missing_arguments",
+                        message: "Missing arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             if let getArgs = args as? [String: Any] {
                 self.data = Data(args: getArgs)
                 self.showMissedCallNotification(data!)
+                result(true)
+            } else {
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
             }
-            result(true)
             break
         case "startCall":
             guard let args = call.arguments else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "missing_arguments",
+                        message: "Missing arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             if let getArgs = args as? [String: Any] {
                 self.data = Data(args: getArgs)
                 self.startCall(self.data!, fromPushKit: false)
+                result(true)
+            } else {
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
             }
-            result(true)
             break
         case "endCall":
             guard let args = call.arguments else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "missing_arguments",
+                        message: "Missing arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             
@@ -221,10 +267,16 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
 
             break
         case "muteCall":
-            guard let args = call.arguments as? [String: Any] ,
+            guard let args = call.arguments as? [String: Any],
                   let callId = args["id"] as? String,
                   let isMuted = args["isMuted"] as? Bool else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             
@@ -232,14 +284,26 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             result(true)
             break
         case "isMuted":
-            guard let args = call.arguments as? [String: Any] ,
-                  let callId = args["id"] as? String else{
-                result(false)
+            guard let args = call.arguments as? [String: Any],
+                  let callId = args["id"] as? String else {
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             guard let callUUID = UUID(uuidString: callId),
                   let call = self.callManager.callWithUUID(uuid: callUUID) else {
-                result(false)
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid UUID",
+                        details: nil
+                    )
+                )
                 return
             }
             result(call.isMuted)
@@ -248,7 +312,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             guard let args = call.arguments as? [String: Any] ,
                   let callId = args["id"] as? String,
                   let onHold = args["isOnHold"] as? Bool else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             self.holdCall(callId, onHold: onHold)
@@ -256,7 +326,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             break
         case "callConnected":
             guard let args = call.arguments else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "missing_arguments",
+                        message: "Missing arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             if (self.isFromPushKit) {
@@ -285,7 +361,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         case "reportCallEnd":
             guard let args = call.arguments as? [String: Any],
                   let uuid = args["uuid"] as? String? else {
-                result("OK")
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
                 return
             }
 
@@ -298,7 +380,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             break;
         case "silenceEvents":
             guard let silence = call.arguments as? Bool else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             
@@ -307,13 +395,27 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             break;
         case "requestNotificationPermission":
             guard let args = call.arguments else {
-                result(true)
+                result(
+                    FlutterError(
+                        code: "missing_arguments",
+                        message: "Missing arguments",
+                        details: nil
+                    )
+                )
                 return
             }
             if let getArgs = args as? [String: Any] {
                 self.requestNotificationPermission(getArgs)
+                result(true)
+            } else {
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
             }
-            result(true)
             break
          case "requestFullIntentPermission": 
             result(true)

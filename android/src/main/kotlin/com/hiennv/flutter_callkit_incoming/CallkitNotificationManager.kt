@@ -187,13 +187,13 @@ class CallkitNotificationManager(
                 CallkitConstants.EXTRA_CALLKIT_DURATION, 0L
             )
         )
-        notificationBuilder.setOnlyAlertOnce(true)
-        notificationBuilder.setSound(null)
-        notificationBuilder.setFullScreenIntent(
+        notificationBuilder?.setOnlyAlertOnce(true)
+        notificationBuilder?.setSound(null)
+        notificationBuilder?.setFullScreenIntent(
             pendingIntent, true
         )
-        notificationBuilder.setContentIntent(pendingIntent)
-        notificationBuilder.setDeleteIntent(getTimeOutPendingIntent(notificationId, data))
+        notificationBuilder?.setContentIntent(pendingIntent)
+        notificationBuilder?.setDeleteIntent(getTimeOutPendingIntent(notificationId, data))
         val typeCall = data.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)
         var smallIcon = context.applicationInfo.icon // drawable resource identifier (in the package's resources)
         if (typeCall > 0) {
