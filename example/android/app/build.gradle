@@ -27,6 +27,11 @@ apply plugin: 'com.google.gms.google-services'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    // Conditional for compatibility with AGP <4.2.
+    if (project.android.hasProperty("namespace")) {
+      namespace "com.hiennv.testing"
+    }
+
     compileSdk 34
 
     sourceSets {
