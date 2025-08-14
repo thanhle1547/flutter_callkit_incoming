@@ -1,3 +1,7 @@
+## 2.5.9
+* Using FLAG_ALLOW_LOCK_WHILE_SCREEN_ON to allow the lock screen to activate while the screen is on on Android version below 8.1
+* Upgrade to Gradle version to 8.5 and AGP to 8.3.0 to able to run with Android Studio Narwhal Feature Drop | 2025.1.2
+
 ## 2.5.8
 * Fix OnGoing notification Android
 * Add missed call notification for iOS(notification/callback action - need to setup more in AppDelegate.swift)
