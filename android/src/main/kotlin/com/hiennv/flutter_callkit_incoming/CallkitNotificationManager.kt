@@ -1034,11 +1034,7 @@ class CallkitNotificationManager(
     }
 
     fun canUseFullScreenIntent(): Boolean {
-        val canUseFullScreenIntent = getNotificationManager().canUseFullScreenIntent()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            return canUseFullScreenIntent
-        }
-        return true
+        return getNotificationManager().canUseFullScreenIntent()
     }
 
 
