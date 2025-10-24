@@ -1,3 +1,9 @@
+## 3.0.0
+* Using Plugin DSL for Android, thank @AAkira https://github.com/hiennguyen92/flutter_callkit_incoming/pull/743
+* Add Android native callback, thank @joshoconnor89 https://github.com/hiennguyen92/flutter_callkit_incoming/pull/736
+* Improve plugin lifecycle, thank @lohzi97 https://github.com/hiennguyen92/flutter_callkit_incoming/pull/746
+* Fixed some bugs.
+
 ## 2.5.9
 * Using FLAG_ALLOW_LOCK_WHILE_SCREEN_ON to allow the lock screen to activate while the screen is on on Android version below 8.1
 * Upgrade to Gradle version to 8.5 and AGP to 8.3.0 to able to run with Android Studio Narwhal Feature Drop | 2025.1.2
