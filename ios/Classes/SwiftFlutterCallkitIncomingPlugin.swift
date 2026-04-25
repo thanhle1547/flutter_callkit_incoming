@@ -686,7 +686,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         NotificationCenter.default.post(name: AVAudioSession.interruptionNotification, object: self, userInfo: userInfo)
     }
     
-    public func activateAudioSession(){
+    public func activateAudioSession() -> Bool {
         if data?.configureAudioSession != false {
             let session = AVAudioSession.sharedInstance()
             do{
@@ -700,13 +700,19 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 try session.setActive(data?.audioSessionActive ?? true)
                 try session.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0)
                 try session.setPreferredIOBufferDuration(data?.audioSessionPreferredIOBufferDuration ?? 0.005)
+
+                return true
             }catch{
                 print(error)
+
+                return false
             }
         }
+
+        return false
     }
     
-    func reactivateAudioSession() {
+    func reactivateAudioSession() -> Bool {
         return activateAudioSession()
     }
     
