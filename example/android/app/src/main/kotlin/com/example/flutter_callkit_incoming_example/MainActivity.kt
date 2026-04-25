@@ -5,8 +5,7 @@ import com.hiennv.flutter_callkit_incoming.CallkitEventCallback
 import com.hiennv.flutter_callkit_incoming.FlutterCallkitIncomingPlugin
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterActivity(){
-
+class MainActivity : FlutterActivity() {
     private var callkitEventCallback = object: CallkitEventCallback{
         override fun onCallEvent(event: CallkitEventCallback.CallEvent, callData: Bundle) {
             when (event) {
@@ -29,6 +28,4 @@ class MainActivity: FlutterActivity(){
         FlutterCallkitIncomingPlugin.unregisterEventCallback(callkitEventCallback)
         super.onDestroy()
     }
-
-
 }

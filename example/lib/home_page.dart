@@ -292,6 +292,8 @@ class HomePageState extends State<HomePage> {
             break;
           case Event.actionCallCustom:
             break;
+          case Event.pushKitIncomingCall:
+            break;
         }
         callback(event);
       });
