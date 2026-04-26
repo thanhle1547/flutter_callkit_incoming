@@ -686,7 +686,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         NotificationCenter.default.post(name: AVAudioSession.interruptionNotification, object: self, userInfo: userInfo)
     }
     
-    public func activateAudioSession(duckOthers: Bool = true) -> Bool {
+    public func activateAudioSession(duckOthers: Bool = true) -> Bool? {
         if data?.configureAudioSession != false {
             let session = AVAudioSession.sharedInstance()
             do{
@@ -710,10 +710,10 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             }
         }
 
-        return false
+        return nil
     }
     
-    func reactivateAudioSession() -> Bool {
+    func reactivateAudioSession() -> Bool? {
         return activateAudioSession()
     }
     
