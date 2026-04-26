@@ -567,6 +567,22 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         deactivateAudioSession()
     }
     
+    /// Requesting a `CXEndCallAction` transaction to end a call can fail for several reasons:
+    ///
+    /// - The `UUID` is invalid or not found.
+    /// - The call has already ended or is in a state that cannot be transitioned.
+    /// - System constraints (e.g., restricted permissions) prevent the transaction.
+    @objc public func endACallOf(_ call: Call) throws {
+        if (self.isFromPushKit) {
+            self.isFromPushKit = false
+            self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, call.data.toJSON())
+        }
+
+        self.callManager.endCall(call: call)
+        
+        deactivateAudioSession()
+    }
+
     @objc public func connectedCall(_ data: Data) {
         var call: Call? = nil
         if(self.isFromPushKit){
