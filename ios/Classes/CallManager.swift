@@ -25,6 +25,7 @@ class CallManager: NSObject {
         let uuid = UUID(uuidString: data.uuid)
         let startCallAction = CXStartCallAction(call: uuid!, handle: handle)
         startCallAction.isVideo = data.type > 0
+        startCallAction.contactIdentifier = data.nameCaller
         let callTransaction = CXTransaction()
         callTransaction.addAction(startCallAction)
         //requestCall
