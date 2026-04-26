@@ -28,6 +28,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     static let PUSH_KIT_INCOMING_CALL = "com.hiennv.flutter_callkit_incoming.PUSH_KIT_INCOMING_CALL"
     
     @objc public private(set) static var sharedInstance: SwiftFlutterCallkitIncomingPlugin!
+    @objc public var onAudioSessionConfigurationError: ((NSError?) -> Void)?
     
     private var streamHandlers: WeakArray<EventCallbackHandler> = WeakArray([])
     
@@ -706,6 +707,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             }catch{
                 print(error)
 
+                onAudioSessionConfigurationError?(error as NSError?)
+
                 return false
             }
         }
@@ -727,6 +730,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 )
             } catch {
                 print(error)
+                onAudioSessionConfigurationError?(error as NSError?)
             }
         }
     }
