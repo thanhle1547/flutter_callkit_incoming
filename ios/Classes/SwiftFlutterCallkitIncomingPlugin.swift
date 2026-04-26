@@ -581,6 +581,10 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     @objc public func activeCalls() -> [[String: Any]] {
         return self.callManager.activeCalls()
     }
+
+    @objc public func allCalls() -> [Call] {
+        return self.callManager.calls
+    }
     
     @objc public func endAllCalls() {
         self.isFromPushKit = false
