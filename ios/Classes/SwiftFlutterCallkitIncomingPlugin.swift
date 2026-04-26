@@ -686,15 +686,16 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         NotificationCenter.default.post(name: AVAudioSession.interruptionNotification, object: self, userInfo: userInfo)
     }
     
-    public func activateAudioSession() -> Bool {
+    public func activateAudioSession(duckOthers: Bool = true) -> Bool {
         if data?.configureAudioSession != false {
             let session = AVAudioSession.sharedInstance()
             do{
-                try session.setCategory(AVAudioSession.Category.playAndRecord, options: [
-                    .allowBluetoothA2DP,
-                    .duckOthers,
-                    .allowBluetooth,
-                ])
+                var options: AVAudioSession.CategoryOptions = [.allowBluetoothA2DP, .allowBluetooth]
+                if duckOthers {
+                    options.insert(.duckOthers)
+                }
+
+                try session.setCategory(.playAndRecord, options: options)
                 
                 try session.setMode(self.getAudioSessionMode(data?.audioSessionMode))
                 try session.setActive(data?.audioSessionActive ?? true)
