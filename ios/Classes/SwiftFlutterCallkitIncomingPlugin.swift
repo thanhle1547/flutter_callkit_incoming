@@ -796,11 +796,12 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             action.fail()
             return
         }
-        // self.reactivateAudioSession()
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1200)) {
-            self.reactivateAudioSession()
-        }
 
+        // Fulfill the action immediately to notify the system the app is ready.
+        // Audio initialization MUST be deferred until `provider(_:didActivate:)`.
+        // Starting the AVAudioSession prematurely often results in the system
+        // terminating the session upon CallKit activation, leading to no audio.
+        // self.reactivateAudioSession()
 
         call.hasConnectDidChange = { [weak self] in
             self?.sharedProvider?.reportOutgoingCall(with: call.uuid, connectedAt: call.connectedData)
@@ -915,11 +916,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     // Called when AVAudioSession.setActive to true.
     // It's means that the provider’s audio session is activated.
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-
-        if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
-            appDelegate.didActivateAudioSession(audioSession)
-        }
-
         if(self.answerCall?.hasConnected ?? false){
             sendDefaultAudioInterruptionNotificationToStartAudioResource()
             return
@@ -941,6 +937,10 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
         sendDefaultAudioInterruptionNotificationToStartAudioResource()
         activateAudioSession()
+
+        if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
+            appDelegate.didActivateAudioSession(audioSession)
+        }
 
         self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_AUDIO_SESSION, [ "isActivate": true ])
     }
