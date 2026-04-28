@@ -16,6 +16,7 @@ class CallkitNotificationService : Service() {
 
         private val ActionForeground = listOf(
             CallkitConstants.ACTION_CALL_START,
+            CallkitConstants.ACTION_CALL_INCOMING,
             CallkitConstants.ACTION_CALL_ACCEPT
         )
 
@@ -67,6 +68,16 @@ class CallkitNotificationService : Service() {
                     }
                 }
         }
+        if (intent?.action === CallkitConstants.ACTION_CALL_INCOMING) {
+            intent.getBundleExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
+                ?.let {
+                    if (it.getBoolean(CallkitConstants.EXTRA_CALLKIT_CALLING_SHOW, true)) {
+                        showIncomingCallNotification(it)
+                    }else {
+                        stopSelf()
+                    }
+                }
+        }
         if (intent?.action === CallkitConstants.ACTION_CALL_ACCEPT) {
             intent.getBundleExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
                 ?.let {
@@ -81,21 +92,33 @@ class CallkitNotificationService : Service() {
         return START_STICKY
     }
 
-    @SuppressLint("MissingPermission")
     private fun showOngoingCallNotification(bundle: Bundle) {
 
         val callkitNotification =
             getCallkitNotificationManager()?.getOnGoingCallNotification(bundle, false)
-        if (callkitNotification != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(
-                    callkitNotification.id,
-                    callkitNotification.notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-                )
-            } else {
-                startForeground(callkitNotification.id, callkitNotification.notification)
-            }
+
+        showCallNotification(callkitNotification)
+    }
+
+    private fun showIncomingCallNotification(bundle: Bundle) {
+        val callkitNotification =
+            getCallkitNotificationManager()?.getIncomingNotification(bundle)
+
+        showCallNotification(callkitNotification)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun showCallNotification(callkitNotification: CallkitNotification?) {
+        if (callkitNotification == null) return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                callkitNotification.id,
+                callkitNotification.notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+            )
+        } else {
+            startForeground(callkitNotification.id, callkitNotification.notification)
         }
     }
 

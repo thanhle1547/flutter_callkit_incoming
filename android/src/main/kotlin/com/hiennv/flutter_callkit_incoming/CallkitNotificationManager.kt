@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.net.Uri
@@ -26,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import androidx.core.app.ServiceCompat.startForeground
 import java.util.Date
 
 
@@ -163,7 +165,7 @@ class CallkitNotificationManager(
         }) {}
     }
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "FullScreenIntentPolicy")
     fun getIncomingNotification(data: Bundle): CallkitNotification? {
         data.putLong(EXTRA_TIME_START_CALL, System.currentTimeMillis())
 
@@ -189,9 +191,13 @@ class CallkitNotificationManager(
         )
         notificationBuilder?.setOnlyAlertOnce(true)
         notificationBuilder?.setSound(null)
-        notificationBuilder?.setFullScreenIntent(
-            pendingIntent, true
-        )
+        if (canUseFullScreenIntent()) {
+            notificationBuilder?.setFullScreenIntent(
+                pendingIntent, true
+            )
+        } else {
+            notificationBuilder?.setContentIntent(pendingIntent)
+        }
         notificationBuilder?.setContentIntent(pendingIntent)
         notificationBuilder?.setDeleteIntent(getTimeOutPendingIntent(notificationId, data))
         val typeCall = data.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)
@@ -344,7 +350,15 @@ class CallkitNotificationManager(
         notificationBuilder?.setOngoing(true)
         val notification = notificationBuilder?.build()
 
-        return notification?.let { CallkitNotification(notificationId, it) }
+        return notification?.let {
+            if (!canUseFullScreenIntent()) {
+                // The notification sound and vibration will continue to play in a loop
+                // until the user either dismisses the notification or opens the notification drawer.
+                it.flags = NotificationCompat.FLAG_INSISTENT
+            }
+
+            CallkitNotification(notificationId, it)
+        }
     }
 
     private fun initInComingNotificationViews(
@@ -1115,6 +1129,30 @@ class CallkitNotificationManager(
                     }
                 }
             }
+        }
+    }
+
+    fun isFullIntentPermissionInManifest(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return true
+        }
+
+        val packageManager = context.packageManager
+        return try {
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(
+                    context.packageName,
+                    PackageManager.PackageInfoFlags.of(PackageManager.GET_PERMISSIONS.toLong())
+                )
+            } else {
+                // Older versions
+                packageManager.getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
+            }
+
+            val declaredPermissions = packageInfo.requestedPermissions
+            declaredPermissions?.contains(Manifest.permission.USE_FULL_SCREEN_INTENT) ?: false
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
         }
     }
 

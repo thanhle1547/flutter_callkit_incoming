@@ -88,7 +88,13 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _uuid = const Uuid();
     initFirebase();
     WidgetsBinding.instance.addObserver(this);
-    FlutterCallkitIncoming.requestFullIntentPermission();
+    FlutterCallkitIncoming.isFullIntentPermissionInManifest().then(
+      (isDeclared) {
+        if (isDeclared == true) {
+          FlutterCallkitIncoming.requestFullIntentPermission();
+        }
+      },
+    );
 
     //Check call when open app from terminated
     checkAndNavigationCallingPage();

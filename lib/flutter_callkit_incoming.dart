@@ -161,6 +161,23 @@ class FlutterCallkitIncoming {
     return await _channel.invokeMethod("canUseFullScreenIntent");
   }
 
+  /// Checks at runtime if `android.permission.USE_FULL_SCREEN_INTENT` is 
+  /// requested in the final merged `AndroidManifest.xml`.///
+  ///
+  /// This verifies if the app binary is capable of initiating a full-screen 
+  /// intent transition. This is primarily used for testing and validation 
+  /// when the permission is removed to comply with Google Play policies 
+  /// for apps that are not primarily for calling or alarms.
+  ///
+  /// * **Android**: Returns true if the permission is found in the manifest. 
+  ///   Note: This permission was introduced in API level 29 (Android 10). For devices 
+  ///   running lower than API 29, this method always returns true as the restriction 
+  ///   does not apply.
+  /// * **iOS**: Always returns true (no-op on this platform).
+  static Future isFullIntentPermissionInManifest() async {
+    return await _channel.invokeMethod("isFullIntentPermissionInManifest");
+  }
+
   static CallEvent? _receiveCallEvent(dynamic data) {
     Event? event;
     Map<String, dynamic> body = {};
