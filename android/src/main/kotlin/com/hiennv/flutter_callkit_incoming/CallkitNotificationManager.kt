@@ -11,7 +11,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.net.Uri
@@ -27,7 +26,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
-import androidx.core.app.ServiceCompat.startForeground
 import java.util.Date
 
 
@@ -844,7 +842,25 @@ class CallkitNotificationManager(
         context.sendBroadcast(CallkitIncomingActivity.getIntentEnded(context, isAccepted))
         val notificationId =
             data.getString(CallkitConstants.EXTRA_CALLKIT_ID, "callkit_incoming").hashCode()
-        getNotificationManager().cancel(notificationId)
+
+        var isForegroundNotification = canUseFullScreenIntent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            val notification = getNotificationManager().activeNotifications.find { it.id == notificationId }
+
+            if (notification != null) {
+                isForegroundNotification = (notification.notification.flags and Notification.FLAG_FOREGROUND_SERVICE) != 0
+            }
+        }
+
+        if (isForegroundNotification) {
+            CallkitNotificationService.startServiceWithAction(
+                context,
+                CallkitConstants.ACTION_CALL_DECLINE,
+                data
+            )
+        } else {
+            getNotificationManager().cancel(notificationId)
+        }
         targetInComingAvatarDefault?.let {
             targetInComingAvatarDefault?.isCancelled = true
             targetInComingAvatarDefault = null

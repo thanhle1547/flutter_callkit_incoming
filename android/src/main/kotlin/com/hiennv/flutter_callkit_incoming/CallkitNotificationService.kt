@@ -17,7 +17,8 @@ class CallkitNotificationService : Service() {
         private val ActionForeground = listOf(
             CallkitConstants.ACTION_CALL_START,
             CallkitConstants.ACTION_CALL_INCOMING,
-            CallkitConstants.ACTION_CALL_ACCEPT
+            CallkitConstants.ACTION_CALL_ACCEPT,
+            CallkitConstants.ACTION_CALL_DECLINE
         )
 
 
@@ -89,6 +90,9 @@ class CallkitNotificationService : Service() {
                     }
                 }
         }
+        if (intent?.action === CallkitConstants.ACTION_CALL_DECLINE) {
+            stopSelf()
+        }
         return START_STICKY
     }
 
@@ -121,7 +125,6 @@ class CallkitNotificationService : Service() {
             startForeground(callkitNotification.id, callkitNotification.notification)
         }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
