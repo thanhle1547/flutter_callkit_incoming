@@ -424,6 +424,9 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
          case "canUseFullScreenIntent": 
             result(true)
             break
+         case "isFullIntentPermissionInManifest":
+            result(true)
+            break
         case "hideCallkitIncoming":
             result(true)
             break
