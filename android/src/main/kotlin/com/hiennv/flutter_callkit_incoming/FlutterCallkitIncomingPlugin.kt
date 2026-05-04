@@ -334,6 +334,10 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                     result.success("")
                 }
 
+                "isSandboxEnvironment" -> {
+                    result.success(true)
+                }
+
                 "silenceEvents" -> {
                     val silence = call.arguments as? Boolean ?: false
                     CallkitIncomingBroadcastReceiver.silenceEvents = silence

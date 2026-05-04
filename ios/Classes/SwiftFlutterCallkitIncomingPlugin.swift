@@ -379,6 +379,9 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         case "getDevicePushTokenVoIP":
             result(self.getDevicePushTokenVoIP())
             break;
+        case "isSandboxEnvironment":
+            result(self.isSandboxEnvironment())
+            break;
         case "silenceEvents":
             guard let silence = call.arguments as? Bool else {
                 result(
@@ -449,7 +452,34 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     @objc public func getDevicePushTokenVoIP() -> String {
         return UserDefaults.standard.string(forKey: devicePushTokenVoIP) ?? ""
     }
-    
+
+    /**
+     * Returns true if the app is in a development state.
+     *
+     * This uses a two-layered detection:
+     * 1. Build-time: Uses the DEBUG flag to identify a Debug configuration.
+     * 2. Runtime: Uses the sysctl P_TRACED check to detect an active debugger attachment.
+     *
+     * @warning This function will return FALSE on production App Store builds.
+     * On iOS, debuggers cannot be attached to App Store-distributed binaries
+     * due to system-level security restrictions (get-task-allow=false).
+     */
+    @objc public func isSandboxEnvironment() -> Bool {
+        #if DEBUG
+        var info = kinfo_proc()
+        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()]
+        var size = MemoryLayout<kinfo_proc>.stride
+        let result = sysctl(&mib, UInt32(mib.count), &info, &size, nil, 0)
+
+        if result == 0 {
+            return (info.kp_proc.p_flag & P_TRACED) != 0
+        }
+        return false
+        #else
+        return false
+        #endif
+    }
+
     @objc public func getAcceptedCall() -> Data? {
         NSLog("Call data ids \(String(describing: data?.uuid)) \(String(describing: answerCall?.uuid.uuidString))")
         if data?.uuid.lowercased() == answerCall?.uuid.uuidString.lowercased() {

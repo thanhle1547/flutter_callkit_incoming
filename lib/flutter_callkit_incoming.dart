@@ -133,6 +133,13 @@ class FlutterCallkitIncoming {
     return await _channel.invokeMethod("getDevicePushTokenVoIP");
   }
 
+  /// Get device push token VoIP.
+  /// On iOS: return true if a debugger is attached.
+  /// On Android: return true.
+  static Future isSandboxEnvironment() async {
+    return await _channel.invokeMethod("isSandboxEnvironment");
+  }
+
   /// Silence CallKit events
   static Future silenceEvents() async {
     return await _channel.invokeMethod("silenceEvents", true);
