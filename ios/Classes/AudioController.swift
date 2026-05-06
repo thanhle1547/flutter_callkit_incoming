@@ -110,7 +110,7 @@ class AudioController: NSObject {
 
         } catch {
             Debug.print("Error setting up audio session: \(error)")
-            SwiftFlutterCallkitIncomingPlugin.sharedInstance.onAudioSessionConfigurationError?(error as NSError?)
+            SwiftFlutterCallkitIncomingPlugin.onAudioSessionConfigurationError?(error as NSError?)
         }
     }
 
@@ -177,7 +177,7 @@ class AudioController: NSObject {
             return isDirty
         } catch {
             Debug.print("Error re-setting up audio session: \(error)")
-            SwiftFlutterCallkitIncomingPlugin.sharedInstance.onAudioSessionConfigurationError?(error as NSError?)
+            SwiftFlutterCallkitIncomingPlugin.onAudioSessionConfigurationError?(error as NSError?)
 
             return nil
         }
@@ -237,7 +237,7 @@ class AudioController: NSObject {
             // onSpeakerToogled(on)
         } catch {
             Debug.print("Error overriding output audio port: \(error)")
-            SwiftFlutterCallkitIncomingPlugin.sharedInstance.onAudioSessionConfigurationError?(error as NSError?)
+            SwiftFlutterCallkitIncomingPlugin.onAudioSessionConfigurationError?(error as NSError?)
         }
     }
 
@@ -488,7 +488,7 @@ class AudioController: NSObject {
                 Debug.print("▶️ Restarted audio engine after reconfiguration")
             } catch {
                 Debug.print("❌ Failed to restart audio engine: \(error)")
-                SwiftFlutterCallkitIncomingPlugin.sharedInstance.onAudioSessionConfigurationError?(error as NSError?)
+                SwiftFlutterCallkitIncomingPlugin.onAudioSessionConfigurationError?(error as NSError?)
             }
         }
     }
@@ -517,7 +517,7 @@ class AudioController: NSObject {
             return true
         } catch {
             Debug.print("Failed to start the the Voice-Processing I/O unit: \(error)")
-            SwiftFlutterCallkitIncomingPlugin.sharedInstance.onAudioSessionConfigurationError?(error as NSError?)
+            SwiftFlutterCallkitIncomingPlugin.onAudioSessionConfigurationError?(error as NSError?)
             return false
         }
     }
