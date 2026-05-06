@@ -13,23 +13,25 @@ class CallManager: NSObject {
     
     private let callController = CXCallController()
     private var sharedProvider: CXProvider? = nil
-    private(set) var calls = [Call]()
-    
     
     func setSharedProvider(_ sharedProvider: CXProvider) {
         self.sharedProvider = sharedProvider
     }
-    
+
+    // MARK: - Actions
+
     func startCall(_ data: Data) {
         let handle = CXHandle(type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
         let uuid = UUID(uuidString: data.uuid)
+
         let startCallAction = CXStartCallAction(call: uuid!, handle: handle)
         startCallAction.isVideo = data.type > 0
         startCallAction.contactIdentifier = data.nameCaller
+
         let callTransaction = CXTransaction()
         callTransaction.addAction(startCallAction)
-        //requestCall
-        self.requestCall(callTransaction, action: "startCall", completion: { _ in
+
+        self.requestTransaction(callTransaction, action: "startCall", completion: { _ in
             let callUpdate = CXCallUpdate()
             callUpdate.remoteHandle = handle
             callUpdate.supportsDTMF = data.supportsDTMF
@@ -46,34 +48,47 @@ class CallManager: NSObject {
         let muteAction = CXSetMutedCallAction(call: call.uuid, muted: isMuted)
         let callTransaction = CXTransaction()
         callTransaction.addAction(muteAction)
-        self.requestCall(callTransaction, action: "muteCall")
+
+        self.requestTransaction(callTransaction, action: "muteCall")
     }
     
+    /// - Parameters:
+    ///   - call: The call to update on hold status for.
+    ///   - onHold: Specifies whether the call should be placed on hold.
     func holdCall(call: Call, onHold: Bool) {
         let muteAction = CXSetHeldCallAction(call: call.uuid, onHold: onHold)
         let callTransaction = CXTransaction()
         callTransaction.addAction(muteAction)
-        self.requestCall(callTransaction, action: "holdCall")
+
+        self.requestTransaction(callTransaction, action: "holdCall")
     }
     
+    /// Ends the specified call.
+    /// - Parameter call: The call to end.
     func endCall(call: Call) {
+        if didCallWithUuidEnd(call.uuid) {
+            return
+        }
+
+        endCallIds.insert(call.uuid)
+
         let endCallAction = CXEndCallAction(call: call.uuid)
         let callTransaction = CXTransaction()
         callTransaction.addAction(endCallAction)
-        //requestCall
-        self.requestCall(callTransaction, action: "endCall")
+
+        self.requestTransaction(callTransaction, action: "endCall")
     }
     
     func connectedCall(call: Call) {
         let callItem = self.callWithUUID(uuid: call.uuid)
-        callItem?.connectedCall(completion: nil)
+        callItem?.notifyConnected()
         
         let answerAction = CXAnswerCallAction(call: call.uuid)        
         let transaction = CXTransaction(action: answerAction)
 
         callController.request(transaction) { error in
             if let error = error {
-                print("Error answering call: \(error.localizedDescription)")
+                Debug.print("Error answering call: \(error)")
             } else {
                 // Call successfully answered
             }
@@ -86,7 +101,7 @@ class CallManager: NSObject {
             let endCallAction = CXEndCallAction(call: call.uuid)
             let callTransaction = CXTransaction()
             callTransaction.addAction(endCallAction)
-            self.requestCall(callTransaction, action: "endCallAlls")
+            self.requestTransaction(callTransaction, action: "endCallAlls")
         }
     }
     
@@ -106,33 +121,27 @@ class CallManager: NSObject {
         }
         return json
     }
-    
-    
+
     func setHold(call: Call, onHold: Bool) {
         let handleCall = CXSetHeldCallAction(call: call.uuid, onHold: onHold)
         let callTransaction = CXTransaction()
+
         callTransaction.addAction(handleCall)
-        //requestCall
     }
-    
-    
-    private func requestCall(_ transaction: CXTransaction, action: String, completion: ((Bool) -> Void)? = nil) {
-        callController.request(transaction){ error in
+
+    /// Requests that the actions in the specified transaction be asynchronously performed by the telephony provider.
+    /// - Parameter transaction: A transaction that contains actions to be performed.
+    private func requestTransaction(_ transaction: CXTransaction, action: String, completion: ((Bool) -> Void)? = nil) {
+        callController.request(transaction) { error in
             if let error = error {
-                //fail
-                print("Error requesting transaction: \(error)")
-            }else {
-                if(action == "startCall"){
-                    //TODO: push notification for Start Call
-                }else if(action == "endCall" || action == "endCallAlls"){
-                    //TODO: push notification for End Call
-                }
-                completion?(error == nil)
-                print("Requested transaction successfully: \(action)")
+                Debug.print("Error requesting transaction: \(error)")
+            } else {
+                Debug.print("Requested transaction successfully: \(action)")
             }
+
+            completion?(error == nil)
         }
     }
-    
     
     private func getHandleType(_ handleType: String?) -> CXHandle.HandleType {
         var typeDefault = CXHandle.HandleType.generic
@@ -148,33 +157,61 @@ class CallManager: NSObject {
         return typeDefault
     }
     
-    
+    // MARK: - Call Management
+
+    /// A publisher of active calls.
+    private(set) var calls = [Call]()
+
+    /// A publisher of end calls.
+    private(set) var endCallIds: Set<UUID> = Set<UUID>()
+
     static let callsChangedNotification = Notification.Name("CallsChangedNotification")
     var callsChangedHandler: (() -> Void)?
     
-    func callWithUUID(uuid: UUID) -> Call?{
+    /// Returns the call with the specified UUID if it exists.
+    /// - Parameter uuid: The call's unique identifier.
+    /// - Returns: The call with the specified UUID if it exists, otherwise `nil`.
+    func callWithUUID(uuid: UUID) -> Call? {
         guard let idx = calls.firstIndex(where: { $0.uuid == uuid }) else { return nil }
         return calls[idx]
     }
-    
+
+    public func didCallWithUuidEnd(_ uuid: UUID) -> Bool {
+        let containsInSet = endCallIds.contains(uuid)
+        return containsInSet
+    }
+
+    /// Adds a call to the array of active calls.
+    /// - Parameter call: The call  to add.
     func addCall(_ call: Call){
         calls.append(call)
+
         call.stateDidChange = { [weak self] in
             guard let strongSelf = self else { return }
             strongSelf.callsChangedHandler?()
             strongSelf.postCallNotification()
         }
+
         callsChangedHandler?()
         postCallNotification()
     }
     
-    func removeCall(_ call: Call){
+    /// Removes a call from the array of active calls if it exists.
+    /// - Parameter call: The call to remove.
+    func removeCall(_ call: Call) {
+        if didCallWithUuidEnd(call.uuid) {
+            return
+        }
+
+        endCallIds.insert(call.uuid)
+
         guard let idx = calls.firstIndex(where: { $0 === call }) else { return }
         calls.remove(at: idx)
         callsChangedHandler?()
         postCallNotification()
     }
     
+    /// Empties the array of active calls.
     func removeAllCalls() {
         calls.removeAll()
         callsChangedHandler?()
@@ -184,6 +221,4 @@ class CallManager: NSObject {
     private func postCallNotification(){
         NotificationCenter.default.post(name: type(of: self).callsChangedNotification, object: self)
     }
-    
-    
 }

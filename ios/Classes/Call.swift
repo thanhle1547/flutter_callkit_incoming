@@ -10,121 +10,114 @@ import AVFoundation
 import CallKit
 
 public class Call: NSObject {
-    
+
+    // MARK: - Metadata Properties
+
     public var uuid: UUID
     public var data: Data
     public var isOutGoing: Bool
     
     public var handle: String?
-    
+
+    // MARK: - State Change Callbacks
+
     var stateDidChange: (() -> Void)?
-    var hasStartedConnectDidChange: (() -> Void)?
-    var hasConnectDidChange: (() -> Void)?
+    var hasStartedConnectingDidChange: (() -> Void)?
+    var hasConnectedDidChange: (() -> Void)?
     var hasEndedDidChange: (() -> Void)?
-    
-    var connectData: Date?{
-        didSet{
+
+    // MARK: - Call State Properties
+
+    var connectingDate: Date? {
+        didSet {
             stateDidChange?()
-            hasStartedConnectDidChange?()
+            hasStartedConnectingDidChange?()
         }
     }
     
-    var connectedData: Date?{
-        didSet{
+    var connectDate: Date? {
+        didSet {
             stateDidChange?()
-            hasConnectDidChange?()
+            hasConnectedDidChange?()
         }
     }
     
-    var endDate: Date?{
-        didSet{
+    var endDate: Date? {
+        didSet {
             stateDidChange?()
             hasEndedDidChange?()
         }
     }
     
-    var isOnHold = false{
-        didSet{
+    var isOnHold = false {
+        didSet {
             stateDidChange?()
         }
     }
     
-    var isMuted = false{
-        didSet{
-            
+    var isMuted = false {
+        didSet {
+            stateDidChange?()
         }
     }
-    
-    var hasStartedConnecting: Bool{
-        get{
-            return connectData != nil
+
+    // MARK: - Derived Properties
+
+    var hasStartedConnecting: Bool {
+        get {
+            return connectingDate != nil
         }
-        set{
-            connectData = newValue ? Date() : nil
+        set {
+            connectingDate = newValue ? Date() : nil
         }
     }
     
     var hasConnected: Bool {
-        get{
-            return connectedData != nil
+        get {
+            return connectDate != nil
         }
-        set{
-            connectedData = newValue ? Date() : nil
+        set {
+            connectDate = newValue ? Date() : nil
         }
     }
     
     var hasEnded: Bool {
-        get{
+        get {
             return endDate != nil
         }
-        set{
+        set {
             endDate = newValue ? Date() : nil
         }
     }
     
     var duration: TimeInterval {
-        guard let connectDate = connectedData else {
+        guard let connectDate = connectDate else {
             return 0
         }
         return Date().timeIntervalSince(connectDate)
     }
-    
-    init(uuid: UUID, data: Data, isOutGoing: Bool = false){
+
+    // MARK: - Initialization
+
+    init(uuid: UUID, data: Data, isOutGoing: Bool = false) {
         self.uuid = uuid
         self.data = data
         self.isOutGoing = isOutGoing
     }
-    
-    var startCallCompletion: ((Bool) -> Void)?
-    
-    func startCall(withAudioSession audioSession: AVAudioSession ,completion :((_ success : Bool)->Void)?){
-        startCallCompletion = completion
+
+    // MARK: - Actions
+
+    public func notifyConnecting() {
         hasStartedConnecting = true
     }
     
-    var answCallCompletion :((Bool) -> Void)?
-    
-    func ansCall(withAudioSession audioSession: AVAudioSession ,completion :((_ success : Bool)->Void)?){
-        answCallCompletion = completion
-        hasStartedConnecting = true
-    }
-    
-    var connectedCallCompletion: ((Bool) -> Void)?
-    
-    func connectedCall(completion :((_ success : Bool)->Void)?){
-        connectedCallCompletion = completion
+    public func notifyConnected() {
         hasConnected = true
     }
     
-    func endCall(){
+    public func notifyEnded() {
         hasEnded = true
     }
-    
-    func startAudio() {
-        
-    }
-    
-    
 }
 
 @objc public class Data: NSObject {
