@@ -93,6 +93,9 @@ class CallkitNotificationService : Service() {
         if (intent?.action === CallkitConstants.ACTION_CALL_DECLINE) {
             stopSelf()
         }
+
+        // If the system kills the service due to memory pressure or task removal, 
+        // START_STICKY ensures it is recreated with a null intent once resources are available.
         return START_STICKY
     }
 
@@ -136,7 +139,14 @@ class CallkitNotificationService : Service() {
         return null
     }
 
-
+    /**
+     * Triggered when the user removes the app from the "Recents" screen (Overview).
+     * This occurs via a manual swipe-away or a "Clear All" action.
+     * 
+     * While a Foreground Service often survives this or is quickly restarted, 
+     * this callback allows the service to notify itself that the activity 
+     * stack (UI) has been dismissed.
+     */
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

@@ -63,7 +63,11 @@ class CallManager: NSObject {
         self.requestTransaction(callTransaction, action: "holdCall")
     }
     
-    /// Ends the specified call.
+    /// Requests the system to end a call based on a user action.
+    ///
+    /// This function submits a `CXTransaction` containing a `CXEndCallAction`. If successful,
+    /// the system calls `provider(_:perform:)` to finalize the termination.
+    ///
     /// - Parameter call: The call to end.
     func endCall(call: Call) {
         if didCallWithUuidEnd(call.uuid) {

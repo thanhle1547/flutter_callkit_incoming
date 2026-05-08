@@ -144,7 +144,15 @@ public class Call: NSObject {
     @objc public var supportsHolding: Bool
     @objc public var supportsGrouping: Bool
     @objc public var supportsUngrouping: Bool
+
+    /// Determines if the call is recorded in the native Phone app's Recents tab.
+    ///
+    /// - Note: When using a **Generic Handle** and this is set to `true`,
+    ///   the Recents entry may display an encrypted string (e.g., "3f6a2b...")
+    ///   instead of the caller's name. This encrypted value is a combination of
+    ///   `nameCaller` and `handle` (and `phoneNumber`, if `extra` field exists).
     @objc public var includesCallsInRecents: Bool
+
     @objc public var ringtonePath: String
     @objc public var configureAudioSession: Bool
     @objc public var audioSessionMode: String
