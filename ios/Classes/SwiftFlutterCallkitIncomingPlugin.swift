@@ -632,7 +632,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
     }
     
-    @objc public func endCall(_ data: Data) throws {
+    @objc public func endCall(_ data: Data, completion: ((Bool) -> Void)? = nil) throws {
         var uuid: UUID? = nil
 
         if (self.isFromPushKit) {
@@ -657,7 +657,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, data.toJSON())
         }
 
-        self.callManager.endCall(call: call)
+        self.callManager.endCall(call: call, completion: completion)
         
         deactivateAudioSession()
     }
