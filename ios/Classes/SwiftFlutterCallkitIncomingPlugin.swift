@@ -816,6 +816,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     func initCallkitProvider(_ data: Data) {
         if (self.sharedProvider == nil) {
             self.sharedProvider = CXProvider(configuration: createConfiguration(data))
+            // Passing nil for the queue defaults execution to the main queue (DispatchQueue.main)
             self.sharedProvider?.setDelegate(self, queue: nil)
         } else if (data.checkIsDataForConfigurationChange(self.sharedProvider?.configuration)) {
             self.sharedProvider?.configuration = createConfiguration(data)
@@ -983,6 +984,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
     }
     
+    /// Triggered when a user or the system attempts to end a call, such as tapping the "End" button on the CallKit UI
     public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         if self.callManager.didCallWithUuidEnd(action.callUUID) {
             action.fulfill()
