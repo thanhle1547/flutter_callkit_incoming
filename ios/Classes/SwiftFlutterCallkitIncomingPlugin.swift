@@ -803,6 +803,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         deactivateAudioSession()
     }
     
+    @discardableResult
     public func reportCallEnd(_ uuid: String?) -> Bool {
         let effectiveUuid = uuid ?? self.data?.uuid
         
