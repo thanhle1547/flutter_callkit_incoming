@@ -228,6 +228,23 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
                 )
             }
             break
+        case "updateCallerName":
+            guard let args = call.arguments as? [String: Any],
+                  let callId = args["id"] as? String,
+                  let nameCaller = args["nameCaller"] as? String else {
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
+                return
+            }
+            
+            self.updateCallerName(callId, name: nameCaller)
+            result(true)
+            break
         case "endCall":
             guard let args = call.arguments else {
                 result(
@@ -605,6 +622,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         self.outgoingCallData = data
         initCallkitProvider(data)
         self.callManager.startCall(data)
+    }
+    
+    @objc public func updateCallerName(_ callId: String, name: String) {
+        guard let callId = UUID(uuidString: callId) else {
+            return
+        }
+        self.callManager.updateCallerName(callId, name)
     }
     
     @objc public func muteCall(_ callId: String, isMuted: Bool) {

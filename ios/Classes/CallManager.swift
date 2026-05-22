@@ -44,6 +44,12 @@ class CallManager: NSObject {
         })
     }
     
+    func updateCallerName(_ uuid: UUID, _ name: String) {
+        let callUpdate = CXCallUpdate()
+        callUpdate.localizedCallerName = name
+        self.sharedProvider?.reportCall(with: uuid, updated: callUpdate)
+    }
+
     func muteCall(call: Call, isMuted: Bool) {
         let muteAction = CXSetMutedCallAction(call: call.uuid, muted: isMuted)
         let callTransaction = CXTransaction()
