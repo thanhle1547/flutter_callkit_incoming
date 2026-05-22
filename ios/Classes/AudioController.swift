@@ -37,7 +37,7 @@ class AudioController: NSObject {
 
         super.init()
 
-        setupAudioChain(data: data)
+        setupAudioSession(data: data)
 
         isInitialized = true
     }
@@ -50,11 +50,6 @@ class AudioController: NSObject {
 
     // MARK: - Setup
 
-    private func setupAudioChain(data: Data?) {
-        setupAudioSession(data: data)
-        setupIOUnit()
-    }
-
     public func setupAudioSession(duckOthers: Bool = true, data: Data?) {
         let sessionInstance = AVAudioSession.sharedInstance()
         
@@ -62,14 +57,11 @@ class AudioController: NSObject {
             var options: AVAudioSession.CategoryOptions = [
                 .allowBluetoothA2DP,
                 // 'allowBluetooth' was deprecated in iOS 8.0: renamed to 'allowBluetoothHFP'
-                .allowBluetoothHFP
+                .allowBluetoothHFP,
+                .mixWithOthers
             ]
             if duckOthers {
                 options.insert(.duckOthers)
-            }
-            if !isInitialized {
-                // To prevent the error: Session activation failed
-                options.insert(.defaultToSpeaker)
             }
 
             try sessionInstance.setCategory(.playAndRecord, options: options)
@@ -256,24 +248,6 @@ class AudioController: NSObject {
         return !currentRoute.outputs.isEmpty
     }
 
-    private func setupIOUnit() {
-        let newEngine = AVAudioEngine()
-        let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)
-        
-        do {
-            // Enable Echo Cancellation (Voice Processing)
-            try newEngine.inputNode.setVoiceProcessingEnabled(true)
-            
-            // Connect nodes
-            newEngine.connect(newEngine.inputNode, to: newEngine.mainMixerNode, format: format)
-            newEngine.prepare()
-            
-            self.engine = newEngine
-        } catch {
-            Debug.print("Error setting up IO Unit: \(error)")
-        }
-    }
-
     // MARK: - Notification Handlers
 
     @objc private func handleInterruption(notification: Notification) {
@@ -283,25 +257,11 @@ class AudioController: NSObject {
             return
         }
 
-        if type == .began {
-            stopIOUnit()
-        } else if type == .ended {
+        if type == .ended {
             if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
                 let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
                 if options.contains(.shouldResume) {
                     try? AVAudioSession.sharedInstance().setActive(true)
-                    startIOUnit()
-
-                    /*
-                    if speakerEnabled {
-                        if !isSpeakerActive() {
-                            onSpeakerToogled(false)
-
-                            Debug.print("Re-active speaker")
-                            setSpeaker(on: true)
-                        }
-                    }
-                    */
                 }
             }
         }
@@ -418,8 +378,7 @@ class AudioController: NSObject {
                     "📊 Sample rate mismatch detected. Changed from \(String(describing: currentEngineRate))Hz to \(sessionSampleRate)Hz. Restarting audio unit..."
                 )
 
-                // WebRTC's RestartAudioUnitWithNewFormat equivalent:
-                restartAudioEngineWithNewFormat(sampleRate: sessionSampleRate)
+                maybeResetupAudioSession()
             }
         }
 
@@ -435,95 +394,13 @@ class AudioController: NSObject {
         */
     }
 
-    private func restartAudioEngineWithNewFormat(sampleRate: Double) {
-        guard let engine = self.engine else { return }
-
-        let wasRunning = engine.isRunning
-        if wasRunning {
-            engine.stop()
-            Debug.print("🛑 Stopped audio engine for reconfiguration")
-            // Crucial: This detaches nodes so they can accept new formats
-            engine.reset()
-        }
-
-        Debug.print("🔧 Reconfiguring audio engine for new format: \(sampleRate)Hz")
-        // Disconnect all nodes to rebuild the graph
-        engine.disconnectNodeInput(engine.mainMixerNode)
-
-        // Re‑build nodes
-        let inputNode  = engine.inputNode
-        let mixerNode  = engine.mainMixerNode
-
-        // Get the *current* hardware‑locked input format
-        // from the hardware input bus
-        // after route/sample‑rate change
-        let inputFormat = inputNode.inputFormat(forBus: 0 /* for output */)
-        // At this point `inputFormat.sampleRate` should match `session.sampleRate` (≈ hardware).
-
-        guard inputFormat.sampleRate > 0 else {
-            Debug.print("Audio engine input node sample rate 0. Cannot proceed to restart the engine.")
-            return
-        }
-        guard sampleRate > 0 else {
-            Debug.print("Audio session sample rate 0. Cannot proceed to restart the engine.")
-            return
-        }
-
-        // Re‑connect with the *new* format
-        engine.disconnectNodeOutput(inputNode)
-        engine.disconnectNodeOutput(mixerNode)
-        // Connect directly to the mixer using that format
-        // The mixer will handle the sample rate conversion to the output automatically
-        //
-        // If `inputNode.sampleRate` is 0, the engine will crash here
-        engine.connect(engine.inputNode, to: mixerNode, format: inputFormat)
-
-        engine.prepare()
-        Debug.print("✅ Audio engine reconfigured with EQ for sample rate: \(sampleRate)Hz")
-
-        // Restart engine if it was running
-        if wasRunning {
-            do {
-                try engine.start()
-                Debug.print("▶️ Restarted audio engine after reconfiguration")
-            } catch {
-                Debug.print("❌ Failed to restart audio engine: \(error)")
-                SwiftFlutterCallkitIncomingPlugin.onAudioSessionConfigurationError?(error as NSError?)
-            }
-        }
-    }
-
     @objc private func handleMediaServerReset() {
         isAudioChainBeingReconstructed = true
 
         // Brief delay to allow system to recover
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.025) {
-            self.setupAudioChain(data: nil)
-            self.startIOUnit()
+            self.maybeResetupAudioSession()
             self.isAudioChainBeingReconstructed = false
         }
-    }
-
-    // MARK: - Control
-
-    @discardableResult
-    func startIOUnit() -> Bool {
-        do {
-            // Ensures nodes are initialized correctly
-            engine?.prepare()
-
-            try engine?.start()
-
-            return true
-        } catch {
-            Debug.print("Failed to start the the Voice-Processing I/O unit: \(error)")
-            SwiftFlutterCallkitIncomingPlugin.onAudioSessionConfigurationError?(error as NSError?)
-            return false
-        }
-    }
-
-    func stopIOUnit() {
-        speakerEnabled = false
-        engine?.stop()
     }
 }

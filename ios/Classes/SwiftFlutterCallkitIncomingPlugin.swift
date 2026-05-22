@@ -725,18 +725,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
     }
 
-    @objc public func startAudio() {
-        Debug.print("Starting audio")
-
-        audioController?.startIOUnit()
-    }
-
-    func stopAudio() {
-        Debug.print("Stopping audio")
-
-        audioController?.stopIOUnit()
-    }
-
     /// Checks for the presence of audio output hardware.
     ///
     /// Because this method is exposed to Objective-C, it returns `NSNumber?`
@@ -912,8 +900,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     public func providerDidReset(_ provider: CXProvider) {
         Debug.print("Provider did reset")
 
-        stopAudio()
-
         /*
          End any ongoing calls if the provider resets, and remove them from the app's list of calls
          because they are no longer valid.
@@ -1021,9 +1007,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             return
         }
 
-        // Stop call audio when ending a call.
-        stopAudio()
-
         call.notifyEnded()
 
         if (self.answerCall == nil && self.outgoingCall == nil) {
@@ -1058,13 +1041,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         // Update the Call's underlying hold state.
         call.isOnHold = action.isOnHold
         call.isMuted = action.isOnHold
-
-        // Stop or start audio in response to holding or unholding the call.
-        if call.isOnHold {
-            stopAudio()
-        } else {
-            startAudio()
-        }
 
         sendEvent(
             SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_HOLD,
@@ -1144,8 +1120,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     // Called when AVAudioSession.setActive to true.
     // It's means that the provider’s audio session is activated.
-    //
-    // P/S: We can refine configuration here
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
         if(self.answerCall?.hasConnected ?? false){
             sendDefaultAudioInterruptionNotificationToStartAudioResource()
@@ -1159,11 +1133,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         sendDefaultAudioInterruptionNotificationToStartAudioResource()
 
         Debug.print("Audio session is active. Starting audio engine...")
-        /*
-         Start call audio media, now that the audio session is activated,
-         after having its priority elevated.
-         */
-        startAudio()
+        audioController?.setupAudioSession(data: data)
 
         if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
             appDelegate.didActivateAudioSession(audioSession)
