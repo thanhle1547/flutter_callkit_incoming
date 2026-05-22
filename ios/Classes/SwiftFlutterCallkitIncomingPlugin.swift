@@ -675,7 +675,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
 
         self.callManager.endCall(call: call)
         
-        deactivateAudioSession()
+        // Error Domain=NSOSStatusErrorDomain Code=-12988 "Session deactivation failed" UserInfo={NSLocalizedDescription=Session deactivation failed}
+        // deactivateAudioSession()
     }
 
     @objc public func connectedCall(_ data: Data) {
