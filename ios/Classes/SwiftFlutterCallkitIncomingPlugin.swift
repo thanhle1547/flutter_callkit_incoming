@@ -813,6 +813,23 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
     }
     
+    /// Notifies the provider that an incoming call failed to connect.
+    ///
+    /// Use this when an external event causes the call to terminate before it is answered.
+    ///
+    /// - Parameter uuid: The unique identifier of the call.
+    /// - Returns: A boolean indicating if the report was performed.
+    public func reportCallFailed(_ uuid: String?) -> Bool {
+        let effectiveUuid = uuid ?? self.data?.uuid
+        
+        if effectiveUuid != nil {
+            self.saveEndCall(effectiveUuid!, 1)
+            return true
+        } else {
+            return false
+        }
+    }
+    
     func initCallkitProvider(_ data: Data) {
         if (self.sharedProvider == nil) {
             self.sharedProvider = CXProvider(configuration: createConfiguration(data))
