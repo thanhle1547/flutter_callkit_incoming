@@ -357,7 +357,7 @@ public class Call: NSObject {
         return map
     }
 
-    func getEncryptHandle() -> String {
+    open func getEncryptHandle() -> String {
         print("Encrypt handle")
 
         if (normalHandle > 0) {
