@@ -15,6 +15,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     static let ACTION_CALL_DECLINE = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_DECLINE"
     static let ACTION_CALL_ENDED = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ENDED"
     static let ACTION_CALL_TIMEOUT = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_TIMEOUT"
+    static let ACTION_CALL_FAILED = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_FAILED"
     static let ACTION_CALL_CALLBACK = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_CALLBACK"
     static let ACTION_CALL_CUSTOM = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_CUSTOM"
     static let ACTION_CALL_CONNECTED = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_CONNECTED"
@@ -832,18 +833,9 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     /// Notifies the provider that an incoming call failed to connect.
     ///
     /// Use this when an external event causes the call to terminate before it is answered.
-    ///
-    /// - Parameter uuid: The unique identifier of the call.
-    /// - Returns: A boolean indicating if the report was performed.
-    public func reportCallFailed(_ uuid: String?) -> Bool {
-        let effectiveUuid = uuid ?? self.data?.uuid
-        
-        if effectiveUuid != nil {
-            self.saveEndCall(effectiveUuid!, 1)
-            return true
-        } else {
-            return false
-        }
+    public func reportCallFailed(_ data: flutter_callkit_incoming.Data) {
+        self.saveEndCall(data.uuid, 1)
+        sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_FAILED, data.toJSON())
     }
     
     func initCallkitProvider(_ data: Data) {
