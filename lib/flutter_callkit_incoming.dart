@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -204,6 +205,20 @@ class FlutterCallkitIncoming {
     return result.map((data) {
       return CallKitParams.fromJson(_convertMap(data) as Map<String, dynamic>);
     }).toList();
+  }
+
+  /// On iOS: return true if success.
+  /// On Android: only return false.
+  static Future<bool> reportCallEnd([String? uuid]) async {
+    if (Platform.isAndroid) return false;
+
+    try {
+      final result = await _channel.invokeMethod<bool?>("reportCallEnd", {'uuid': uuid});
+
+      return result ?? false;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Get device push token VoIP.
