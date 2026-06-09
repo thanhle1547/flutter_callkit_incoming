@@ -10,17 +10,15 @@ part 'call_kit_params.g.dart';
 @JsonSerializable(explicitToJson: true)
 class CallKitParams {
   const CallKitParams({
-    this.id,
+    required this.id,
     this.nameCaller,
     this.phoneNumber,
     this.appName,
     this.avatar,
     this.handle,
     this.type,
-    this.normalHandle,
     this.duration,
-    this.textAccept,
-    this.textDecline,
+    this.isAccepted = false,
     this.missedCallNotification,
     this.callingNotification,
     this.extra,
@@ -29,21 +27,22 @@ class CallKitParams {
     this.ios,
   });
 
-  final String? id;
+  final String id;
   final String? nameCaller;
   final String? phoneNumber;
   final String? appName;
   final String? avatar;
   final String? handle;
   final int? type;
-  final int? normalHandle;
   final int? duration;
-  final String? textAccept;
-  final String? textDecline;
+  final bool isAccepted;
+
   final NotificationParams? missedCallNotification;
   final NotificationParams? callingNotification;
+
   final Map<String, dynamic>? extra;
   final Map<String, dynamic>? headers;
+
   final AndroidParams? android;
   final IOSParams? ios;
 
@@ -51,4 +50,24 @@ class CallKitParams {
       _$CallKitParamsFromJson(json);
 
   Map<String, dynamic> toJson() => _$CallKitParamsToJson(this);
+
+  @override
+  String toString() {
+    return 'CallKitParams{'
+        'id: $id, '
+        'nameCaller: $nameCaller, '
+        'appName: $appName, '
+        'avatar: $avatar, '
+        'handle: $handle, '
+        'type: $type, '
+        'duration: $duration, '
+        'isAccepted: $isAccepted, '
+        'missedCallNotification: $missedCallNotification, '
+        'callingNotification: $callingNotification, '
+        'extra: $extra, '
+        'headers: $headers, '
+        'android: $android, '
+        'ios: $ios'
+        '}';
+  }
 }

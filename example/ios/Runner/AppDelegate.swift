@@ -236,6 +236,10 @@ import PushKit
         // RTCAudioSession.sharedInstance().isAudioEnabled = false
     }
 
+    func providerDidReset() {
+        print("LOG: providerDidReset")
+    }
+    
     func performRequest(
         parameters: [String: Any],
         completion: @escaping (Result<Any, Error>) -> Void

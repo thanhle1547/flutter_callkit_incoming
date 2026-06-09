@@ -1,6 +1,7 @@
 package com.hiennv.flutter_callkit_incoming
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -16,9 +17,7 @@ class CallkitNotificationService : Service() {
 
         private val ActionForeground = listOf(
             CallkitConstants.ACTION_CALL_START,
-            CallkitConstants.ACTION_CALL_INCOMING,
-            CallkitConstants.ACTION_CALL_ACCEPT,
-            CallkitConstants.ACTION_CALL_DECLINE
+            CallkitConstants.ACTION_CALL_ACCEPT
         )
 
 
@@ -69,16 +68,6 @@ class CallkitNotificationService : Service() {
                     }
                 }
         }
-        if (intent?.action === CallkitConstants.ACTION_CALL_INCOMING) {
-            intent.getBundleExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
-                ?.let {
-                    if (it.getBoolean(CallkitConstants.EXTRA_CALLKIT_CALLING_SHOW, true)) {
-                        showIncomingCallNotification(it)
-                    }else {
-                        stopSelf()
-                    }
-                }
-        }
         if (intent?.action === CallkitConstants.ACTION_CALL_ACCEPT) {
             intent.getBundleExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
                 ?.let {
@@ -90,44 +79,39 @@ class CallkitNotificationService : Service() {
                     }
                 }
         }
-        if (intent?.action === CallkitConstants.ACTION_CALL_DECLINE) {
-            stopSelf()
-        }
-
-        // If the system kills the service due to memory pressure or task removal, 
-        // START_STICKY ensures it is recreated with a null intent once resources are available.
         return START_STICKY
     }
 
+    @SuppressLint("MissingPermission")
     private fun showOngoingCallNotification(bundle: Bundle) {
 
         val callkitNotification =
             getCallkitNotificationManager()?.getOnGoingCallNotification(bundle, false)
-
-        showCallNotification(callkitNotification)
-    }
-
-    private fun showIncomingCallNotification(bundle: Bundle) {
-        val callkitNotification =
-            getCallkitNotificationManager()?.getIncomingNotification(bundle)
-
-        showCallNotification(callkitNotification)
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun showCallNotification(callkitNotification: CallkitNotification?) {
-        if (callkitNotification == null) return
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (callkitNotification != null) {
+            val typeCall = bundle.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)
             startForeground(
                 callkitNotification.id,
                 callkitNotification.notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                typeCall > 0
             )
-        } else {
-            startForeground(callkitNotification.id, callkitNotification.notification)
         }
     }
+
+    private fun startForeground(notificationId: Int, notification: Notification, isVideo: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            var mask = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                mask = mask or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                if (isVideo) {
+                    mask = mask or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+                }
+            }
+            startForeground(notificationId, notification, mask)
+        } else {
+            startForeground(notificationId, notification)
+        }
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -139,25 +123,9 @@ class CallkitNotificationService : Service() {
         return null
     }
 
-    /**
-     * Triggered when the user removes the app from the "Recents" screen (Overview).
-     * This occurs via a manual swipe-away or a "Clear All" action.
-     * 
-     * While a Foreground Service often survives this or is quickly restarted, 
-     * this callback allows the service to notify itself that the activity 
-     * stack (UI) has been dismissed.
-     */
+
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-        }else {
-            stopForeground(true)
-        }
-        stopSelf()
+        // Don't kill the FGS. The app might be closed by user but the call is still ongoing
     }
-
-
-
 }
-

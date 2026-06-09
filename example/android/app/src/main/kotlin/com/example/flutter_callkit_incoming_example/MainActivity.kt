@@ -15,6 +15,9 @@ class MainActivity : FlutterActivity() {
                 CallkitEventCallback.CallEvent.DECLINE -> {
                     // Do something with decline
                 }
+                else -> {
+
+                }
             }
         }
     }
