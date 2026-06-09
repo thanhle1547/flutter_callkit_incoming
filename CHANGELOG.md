@@ -1,3 +1,15 @@
+## 3.0.1
+
+* Add `allCalls`, `endACallOf`, `reportCallFailed`, `updateCallerName` methods on iOS
+* Set `contactIdentifier` to `nameCaller` for CXStartCallAction
+* Make `Call.getEncryptHandle()` method open
+* Add `isSandboxEnvironment` API on iOS to detect a development/sandbox environment
+* Refactor CallKit integration based on Apple Sample Code
+* Add `SwiftFlutterCallkitIncomingPlugin.onAudioSessionConfigurationError` callback
+* Handle incoming call without `USE_FULL_SCREEN_INTENT` permission (Play policy compliance)
+* Add `ACTION_CALL_DECLINE` on Android
+* New example project using Flutter version 3.35.7
+
 ## 3.0.0
 * Using Plugin DSL for Android, thank @AAkira https://github.com/hiennguyen92/flutter_callkit_incoming/pull/743
 * Add Android native callback, thank @joshoconnor89 https://github.com/hiennguyen92/flutter_callkit_incoming/pull/736
