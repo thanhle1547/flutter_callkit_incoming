@@ -363,6 +363,9 @@ class AudioController: NSObject {
             connectedDevices += "\n"
             deviceNumber += 1
         }
+        
+        connectedDevices += " (volume: \(session.outputVolume))"
+
         Debug.print("Current audio routes:")
         Debug.print(connectedDevices)
 
