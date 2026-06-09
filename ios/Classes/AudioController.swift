@@ -67,38 +67,8 @@ class AudioController: NSObject {
             try sessionInstance.setCategory(.playAndRecord, options: options)
 
             try sessionInstance.setMode(self.getAudioSessionMode(data?.audioSessionMode))
-            try sessionInstance.setActive(data?.audioSessionActive ?? true)
             try sessionInstance.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0) // 44.1kHz
             try sessionInstance.setPreferredIOBufferDuration(data?.audioSessionPreferredIOBufferDuration ?? 0.005) // 5 ms
-
-            // Notifications
-            let nc = NotificationCenter.default
-
-            if isAudioSessionObserved {
-                nc.removeObserver(self)
-            }
-
-            // Add interruption handler.
-            nc.addObserver(
-                self,
-                selector: #selector(handleInterruption),
-                name: AVAudioSession.interruptionNotification,
-                object: sessionInstance
-            )
-            // Add the route change notification.
-            nc.addObserver(
-                self,
-                selector: #selector(handleRouteChange),
-                name: AVAudioSession.routeChangeNotification,
-                object: sessionInstance
-            )
-            // Rebuild the audio chain if media services are reset.
-            nc.addObserver(
-                self,
-                selector: #selector(handleMediaServerReset),
-                name: AVAudioSession.mediaServicesWereResetNotification,
-                object: sessionInstance
-            )
 
         } catch {
             Debug.print("Error setting up audio session: \(error)")
@@ -249,6 +219,51 @@ class AudioController: NSObject {
     }
 
     // MARK: - Notification Handlers
+
+    public func setupAudioSessionObservers() {
+        let sessionInstance = AVAudioSession.sharedInstance()
+
+        // Notifications
+        let nc = NotificationCenter.default
+
+        if isAudioSessionObserved {
+            nc.removeObserver(self)
+        }
+
+        isAudioSessionObserved = true
+
+        // Add interruption handler.
+        nc.addObserver(
+            self,
+            selector: #selector(handleInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: sessionInstance
+        )
+        // Add the route change notification.
+        nc.addObserver(
+            self,
+            selector: #selector(handleRouteChange),
+            name: AVAudioSession.routeChangeNotification,
+            object: sessionInstance
+        )
+        // Rebuild the audio chain if media services are reset.
+        nc.addObserver(
+            self,
+            selector: #selector(handleMediaServerReset),
+            name: AVAudioSession.mediaServicesWereResetNotification,
+            object: sessionInstance
+        )
+    }
+
+    public func removeAudioSessionObservers() {
+        let nc = NotificationCenter.default
+
+        if isAudioSessionObserved {
+            nc.removeObserver(self)
+        }
+
+        isAudioSessionObserved = false
+    }
 
     @objc private func handleInterruption(notification: Notification) {
         guard let userInfo = notification.userInfo,

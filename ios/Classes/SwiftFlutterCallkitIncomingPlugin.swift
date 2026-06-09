@@ -557,6 +557,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         callUpdate.localizedCallerName = data.nameCaller
         
         initCallkitProvider(data)
+        audioController?.setupAudioSessionObservers()
         
         let uuid = UUID(uuidString: data.uuid)
 
@@ -621,6 +622,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
         self.outgoingCallData = data
         initCallkitProvider(data)
+        audioController?.setupAudioSessionObservers()
         self.callManager.startCall(data)
     }
     
@@ -1156,8 +1158,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
 
         sendDefaultAudioInterruptionNotificationToStartAudioResource()
 
-        Debug.print("Audio session is active. Starting audio engine...")
-        audioController?.setupAudioSession(data: data)
+        Debug.print("Audio session is active.")
 
         if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
             appDelegate.didActivateAudioSession(audioSession)
@@ -1172,6 +1173,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
             appDelegate.didDeactivateAudioSession(audioSession)
         }
+
+        audioController?.removeAudioSessionObservers()
 
         if self.outgoingCall?.isOnHold ?? false || self.answerCall?.isOnHold ?? false{
             Debug.print("Call is on hold")
