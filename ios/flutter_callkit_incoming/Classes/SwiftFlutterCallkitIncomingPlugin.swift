@@ -16,6 +16,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     static let ACTION_CALL_ENDED = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ENDED"
     static let ACTION_CALL_TIMEOUT = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_TIMEOUT"
     static let ACTION_CALL_FAILED = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_FAILED"
+    static let ACTION_CALL_UNANSWERED = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_UNANSWERED"
     static let ACTION_CALL_CALLBACK = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_CALLBACK"
     static let ACTION_CALL_CUSTOM = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_CUSTOM"
     static let ACTION_CALL_CONNECTED = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_CONNECTED"
@@ -388,6 +389,24 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             result(
                 self.reportCallEnd(uuid)
             )
+            break;
+        case "reportCallUnanswered":
+            guard let args = call.arguments as? [String: Any],
+                  let uuid = args["uuid"] as? String? else {
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
+                return
+            }
+
+            if let uuid = uuid {
+                self.reportCallUnanswered(uuid)
+            }
+            result(nil)
             break;
         case "getDevicePushTokenVoIP":
             result(self.getDevicePushTokenVoIP())
@@ -842,7 +861,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         self.saveEndCall(data.uuid, 1)
         sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_FAILED, data.toJSON())
     }
-    
+
+    /// Notifies the provider that an incoming call unanswered.
+    public func reportCallUnanswered(_ uuid: String) {
+        self.saveEndCall(uuid, 3)
+        // sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_UNANSWERED, data.toJSON())
+    }
+
     func initCallkitProvider(_ data: Data) {
         if(self.sharedProvider == nil){
             self.sharedProvider = CXProvider(configuration: createConfiguration(data))

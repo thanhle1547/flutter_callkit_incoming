@@ -193,6 +193,13 @@ class FlutterCallkitIncoming {
     await _channel.invokeMethod("endAllCalls");
   }
 
+  static Future<void> reportCallUnanswered(String uuid) async {
+    await _channel.invokeMethod(
+      "reportCallUnanswered",
+      { "uuid": uuid },
+    );
+  }
+
   /// Get active calls.
   /// On iOS: return active calls from Callkit.
   /// On Android: only return last call

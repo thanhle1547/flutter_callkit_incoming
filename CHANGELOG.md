@@ -25,7 +25,7 @@
 
 ## 3.0.1
 
-* Add `allCalls`, `endACallOf`, `reportCallFailed`, `updateCallerName` methods on iOS
+* Add `allCalls`, `endACallOf`, `reportCallFailed`, `updateCallerName`, `reportCallUnanswered` methods on iOS
 * Set `contactIdentifier` to `nameCaller` for CXStartCallAction
 * Make `Call.getEncryptHandle()` method open
 * Add `isSandboxEnvironment` API on iOS to detect a development/sandbox environment
