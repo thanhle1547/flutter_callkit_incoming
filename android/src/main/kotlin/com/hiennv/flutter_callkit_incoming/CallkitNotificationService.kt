@@ -17,7 +17,9 @@ class CallkitNotificationService : Service() {
 
         private val ActionForeground = listOf(
             CallkitConstants.ACTION_CALL_START,
-            CallkitConstants.ACTION_CALL_ACCEPT
+            CallkitConstants.ACTION_CALL_INCOMING,
+            CallkitConstants.ACTION_CALL_ACCEPT,
+            CallkitConstants.ACTION_CALL_DECLINE
         )
 
 
@@ -68,6 +70,16 @@ class CallkitNotificationService : Service() {
                     }
                 }
         }
+        if (intent?.action === CallkitConstants.ACTION_CALL_INCOMING) {
+            intent.getBundleExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
+                ?.let {
+                    if (it.getBoolean(CallkitConstants.EXTRA_CALLKIT_CALLING_SHOW, true)) {
+                        showIncomingCallNotification(it)
+                    }else {
+                        stopSelf()
+                    }
+                }
+        }
         if (intent?.action === CallkitConstants.ACTION_CALL_ACCEPT) {
             intent.getBundleExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
                 ?.let {
@@ -79,6 +91,9 @@ class CallkitNotificationService : Service() {
                     }
                 }
         }
+        if (intent?.action === CallkitConstants.ACTION_CALL_DECLINE) {
+            stopSelf()
+        }
         return START_STICKY
     }
 
@@ -87,6 +102,20 @@ class CallkitNotificationService : Service() {
 
         val callkitNotification =
             getCallkitNotificationManager()?.getOnGoingCallNotification(bundle, false)
+        if (callkitNotification != null) {
+            val typeCall = bundle.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)
+            startForeground(
+                callkitNotification.id,
+                callkitNotification.notification,
+                typeCall > 0
+            )
+        }
+    }
+
+    private fun showIncomingCallNotification(bundle: Bundle) {
+        val callkitNotification =
+            getCallkitNotificationManager()?.getIncomingNotification(bundle)
+
         if (callkitNotification != null) {
             val typeCall = bundle.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)
             startForeground(
@@ -108,6 +137,7 @@ class CallkitNotificationService : Service() {
             }
             startForeground(notificationId, notification, mask)
         } else {
+            println("About to start foreground notification")
             startForeground(notificationId, notification)
         }
     }

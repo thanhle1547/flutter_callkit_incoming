@@ -124,7 +124,17 @@ class CallkitIncomingActivity : Activity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
             window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
-            window.addFlags(WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
+
+            // FLAG_DISMISS_KEYGUARD removed from the legacy SDK<O_MR1 branch.
+            // The Signal (app) pattern hosts the call Activity over the keyguard without unlocking;
+            // PIN remains in place for the rest of the app.
+            //
+            // dismissKeyguard / FLAG_DISMISS forces the user to enter PIN before audio can flow,
+            // which contradicts that goal.
+            // window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
+
+            // FLAG_ALLOW_LOCK_WHILE_SCREEN_ON allow the lock screen to activate while this aactivity is on
+            // window.addFlags(WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
         }
         transparentStatusAndNavigation()
         setContentView(R.layout.activity_callkit_incoming)

@@ -332,6 +332,14 @@ class FlutterCallkitIncoming {
           throw const FormatException('[ACTION_CALL_TIMEOUT] id is null.');
         }
         return CallEventActionCallTimeout(callkitParams.id);
+
+      case CallEventConstants.actionCallFailed:
+        final callkitParams = toCallkitParams(data);
+        if (callkitParams == null) {
+          throw const FormatException('[ACTION_CALL_FAILED] body is null.');
+        }
+        return CallEventActionCallFailed(callkitParams);
+
       case CallEventConstants.actionCallConnected:
         final callkitParams = toCallkitParams(data);
         if (callkitParams == null) {
@@ -410,6 +418,14 @@ class FlutterCallkitIncoming {
           throw const FormatException('[ACTION_CALL_CUSTOM] body is null.');
         }
         return CallEventActionCallCustom(body);
+
+      case CallEventConstants.pushKitIncomingCall:
+        final callkitParams = toCallkitParams(data);
+        if (callkitParams == null) {
+          throw const FormatException('[PUSH_KIT_INCOMING_CALL] body is null.');
+        }
+        return CallEventPushKitIncomingCall(callkitParams);
+
       default:
         return null;
     }

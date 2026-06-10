@@ -209,6 +209,11 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         )
     }
 
+    public fun allCalls() : ArrayList<Data> {
+        val calls = getDataActiveCalls(context)
+        return calls
+    }
+
     public fun endCall(data: Data) {
         context?.sendBroadcast(
             CallkitIncomingBroadcastReceiver.getIntentEnded(

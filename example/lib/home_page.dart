@@ -255,6 +255,8 @@ class HomePageState extends State<HomePage> {
             break;
           case CallEventActionCallConnected():
             break;
+          case CallEventActionCallFailed():
+            break;
           case CallEventActionCallTimeout():
             break;
           case CallEventActionCallCallback():
@@ -273,9 +275,9 @@ class HomePageState extends State<HomePage> {
             break;
           case CallEventActionCallCustom():
             break;
-          case null:
+          case CallEventPushKitIncomingCall():
             break;
-          case Event.pushKitIncomingCall:
+          case null:
             break;
         }
         callback(event);

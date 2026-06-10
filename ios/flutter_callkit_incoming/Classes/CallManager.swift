@@ -83,14 +83,14 @@ class CallManager: NSObject {
     /// the system calls `provider(_:perform:)` to finalize the termination.
     ///
     /// - Parameter call: The call to end.
-    func endCall(call: Call, completion: ((Bool) -> Void)? = nil) {
-        if didCallWithUuidEnd(call.uuid) {
+    func endCall(callId: UUID, completion: ((Bool) -> Void)? = nil) {
+        if didCallWithUuidEnd(callId) {
             return
         }
 
-        endCallIds.insert(call.uuid)
+        endCallIds.insert(callId)
 
-        let endCallAction = CXEndCallAction(call: call.uuid)
+        let endCallAction = CXEndCallAction(call: callId)
         let callTransaction = CXTransaction()
         callTransaction.addAction(endCallAction)
 

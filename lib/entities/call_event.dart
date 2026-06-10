@@ -17,6 +17,8 @@ abstract class CallEventConstants {
       'com.hiennv.flutter_callkit_incoming.ACTION_CALL_ENDED';
   static const String actionCallTimeout =
       'com.hiennv.flutter_callkit_incoming.ACTION_CALL_TIMEOUT';
+  static const String actionCallFailed =
+      'com.hiennv.flutter_callkit_incoming.ACTION_CALL_FAILED';
   static const String actionCallConnected =
       'com.hiennv.flutter_callkit_incoming.ACTION_CALL_CONNECTED';
   static const String actionCallCallback =
@@ -33,6 +35,8 @@ abstract class CallEventConstants {
       'com.hiennv.flutter_callkit_incoming.ACTION_CALL_TOGGLE_AUDIO_SESSION';
   static const String actionCallCustom =
       'com.hiennv.flutter_callkit_incoming.ACTION_CALL_CUSTOM';
+  static const String pushKitIncomingCall =
+      'com.hiennv.flutter_callkit_incoming.PUSH_KIT_INCOMING_CALL';
 }
 
 /// Base sealed class for CallEvent
@@ -124,6 +128,18 @@ class CallEventActionCallTimeout extends CallEvent {
 
   @override
   String toString() => 'CallEventActionCallTimeout(id: $id)';
+}
+
+class CallEventActionCallFailed extends CallEvent {
+  const CallEventActionCallFailed(this.callKitParams);
+
+  @override
+  String get eventName => CallEventConstants.actionCallFailed;
+
+  final CallKitParams callKitParams;
+
+  @override
+  String toString() => 'CallEventActionCallFailed(params: $callKitParams)';
 }
 
 class CallEventActionCallConnected extends CallEvent {
@@ -230,4 +246,16 @@ class CallEventActionCallCustom extends CallEvent {
 
   @override
   String toString() => 'CallEventActionCallCustom(body: $body)';
+}
+
+class CallEventPushKitIncomingCall extends CallEvent {
+  const CallEventPushKitIncomingCall(this.callKitParams);
+
+  @override
+  String get eventName => CallEventConstants.pushKitIncomingCall;
+
+  final CallKitParams callKitParams;
+
+  @override
+  String toString() => 'CallEventPushKitIncomingCall(callKitParams: $callKitParams)';
 }
