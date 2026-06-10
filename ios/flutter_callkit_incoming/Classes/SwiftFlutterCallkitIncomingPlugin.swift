@@ -853,13 +853,24 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         // sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_UNANSWERED, data.toJSON())
     }
 
-    func initCallkitProvider(_ data: Data) {
+    public func initCallkitProvider(_ data: Data) {
         if(self.sharedProvider == nil){
             self.sharedProvider = CXProvider(configuration: createConfiguration(data))
             // Passing nil for the queue defaults execution to the main queue (DispatchQueue.main)
             self.sharedProvider?.setDelegate(self, queue: nil)
         } else {
             self.sharedProvider?.configuration = createConfiguration(data)
+        }
+        self.callManager.setSharedProvider(self.sharedProvider!)
+    }
+    
+    public func initCallkitProvider(_ config: CXProviderConfiguration) {
+        if(self.sharedProvider == nil){
+            self.sharedProvider = CXProvider(configuration: config)
+            // Passing nil for the queue defaults execution to the main queue (DispatchQueue.main)
+            self.sharedProvider?.setDelegate(self, queue: nil)
+        } else {
+            self.sharedProvider?.configuration = config
         }
         self.callManager.setSharedProvider(self.sharedProvider!)
     }
