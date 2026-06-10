@@ -311,9 +311,10 @@ class FlutterCallkitIncoming {
       case CallEventConstants.actionCallAccept:
         final callkitParams = toCallkitParams(data);
         if (callkitParams == null) {
-          throw const FormatException('[ACTION_CALL_ACCEPT] id is null.');
+          throw const FormatException('[ACTION_CALL_ACCEPT] body is null.');
         }
-        return CallEventActionCallAccept(callkitParams.id);
+        return CallEventActionCallAccept(callkitParams);
+
       case CallEventConstants.actionCallDecline:
         final callkitParams = toCallkitParams(data);
         if (callkitParams == null) {

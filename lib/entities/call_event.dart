@@ -83,15 +83,15 @@ class CallEventActionCallStart extends CallEvent {
 }
 
 class CallEventActionCallAccept extends CallEvent {
-  const CallEventActionCallAccept(this.id);
+  const CallEventActionCallAccept(this.callKitParams);
 
   @override
   String get eventName => CallEventConstants.actionCallAccept;
 
-  final String id;
+  final CallKitParams callKitParams;
 
   @override
-  String toString() => 'CallEventActionCallAccept(id: $id)';
+  String toString() => 'CallEventActionCallAccept(callKitParams: $callKitParams)';
 }
 
 class CallEventActionCallDecline extends CallEvent {

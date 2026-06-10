@@ -245,7 +245,7 @@ class HomePageState extends State<HomePage> {
             break;
           case CallEventActionCallAccept():
             NavigationService.instance
-                .pushNamedIfNotCurrent(AppRoute.callingPage, args: event.id);
+                .pushNamedIfNotCurrent(AppRoute.callingPage, args: event.callKitParams.id);
             break;
           case CallEventActionCallDecline():
             await requestHttp("ACTION_CALL_DECLINE_FROM_DART");
