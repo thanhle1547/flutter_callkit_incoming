@@ -3,6 +3,7 @@ package com.hiennv.flutter_callkit_incoming
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.lang.ref.WeakReference
 
@@ -16,7 +17,9 @@ class Utils {
 
         fun getGsonInstance(): ObjectMapper {
             if (mapper == null) {
-                mapper = ObjectMapper()
+                mapper = ObjectMapper().apply {
+                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                }
             }
             return mapper!!
         }
