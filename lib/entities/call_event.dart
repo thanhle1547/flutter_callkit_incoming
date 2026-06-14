@@ -224,16 +224,16 @@ class CallEventActionCallToggleGroup extends CallEvent {
 }
 
 class CallEventActionCallToggleAudioSession extends CallEvent {
-  const CallEventActionCallToggleAudioSession(this.isActive);
+  const CallEventActionCallToggleAudioSession(this.isActivate);
 
   @override
   String get eventName => CallEventConstants.actionCallToggleAudioSession;
 
-  final bool isActive;
+  final bool isActivate;
 
   @override
   String toString() =>
-      'CallEventActionCallToggleAudioSession(isActive: $isActive)';
+      'CallEventActionCallToggleAudioSession(isActivate: $isActivate)';
 }
 
 class CallEventActionCallCustom extends CallEvent {

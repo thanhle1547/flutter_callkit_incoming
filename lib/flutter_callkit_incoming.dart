@@ -407,12 +407,13 @@ class FlutterCallkitIncoming {
         return CallEventActionCallToggleGroup(id, callUUIDToGroupWith);
       case CallEventConstants.actionCallToggleAudioSession:
         final body = data['body'] as Map<Object?, Object?>?;
-        final isActive = body?['isActive'] as bool?;
-        if (isActive == null) {
+        final isActivate = body?['isActivate'] as bool?;
+        if (isActivate == null) {
           throw const FormatException(
-              '[ACTION_CALL_TOGGLE_AUDIO_SESSION] id is null.');
+              '[ACTION_CALL_TOGGLE_AUDIO_SESSION] isActivate is null.');
         }
-        return CallEventActionCallToggleAudioSession(isActive);
+        return CallEventActionCallToggleAudioSession(isActivate);
+
       case CallEventConstants.actionCallCustom:
         final body = data['body'] as Map<String, dynamic>?;
         if (body == null) {
