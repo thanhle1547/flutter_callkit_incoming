@@ -393,7 +393,7 @@ class AudioController: NSObject {
 
             if currentEngineRate != sessionSampleRate {
                 Debug.print(
-                    "📊 Sample rate mismatch detected. Changed from \(String(describing: currentEngineRate))Hz to \(sessionSampleRate)Hz. Restarting audio unit..."
+                    "📊 Sample rate mismatch detected. Changed from \(String(describing: currentEngineRate))Hz to \(sessionSampleRate)Hz. May be `AVAudioSession` configuration changed!"
                 )
 
                 maybeResetupAudioSession()

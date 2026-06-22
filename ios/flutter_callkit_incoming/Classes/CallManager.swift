@@ -29,7 +29,7 @@ class CallManager: NSObject {
         // safe: no CallKit call gets registered, and the caller can detect the no-op via
         // its own state machine.
         guard let uuid = UUID(uuidString: data.uuid) else {
-            NSLog("[CallkitIncoming] startCall: invalid UUID '\(data.uuid)' — ignored")
+            Debug.print("[CallkitIncoming] startCall: invalid UUID '\(data.uuid)' — ignored")
             return
         }
         let startCallAction = CXStartCallAction(call: uuid, handle: handle)
