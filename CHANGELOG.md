@@ -1,3 +1,10 @@
+## 3.1.3
+* Fix Android: do not launch app when call is declined from self-managed Telecom connection, thank @iboogey https://github.com/hiennguyen92/flutter_callkit_incoming/pull/829
+
+## 3.1.2
+* Fix pack mapped data to expose call event, thank @skutimechanic https://github.com/hiennguyen92/flutter_callkit_incoming/pull/823
+* Fix iOS: restore maximumCallGroups config, hold handler, holdCall event, thank @md-riaz https://github.com/hiennguyen92/flutter_callkit_incoming/pull/825
+
 ## 3.1.1
 * Reorganize iOS native source directory to support Swift Package Manager (SPM) by placing all source files inside the package root (`ios/flutter_callkit_incoming/Classes/`).
 * Resolve SPM mixed-language constraint by removing Objective-C wrappers and implementing a pure-Swift registrar class `@objc(FlutterCallkitIncomingPlugin)` to ensure seamless CocoaPods backward compatibility.
