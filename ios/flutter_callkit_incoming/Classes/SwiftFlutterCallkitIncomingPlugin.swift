@@ -1031,6 +1031,11 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         self.data?.isAccepted = true
         self.answerCall = call
         call.hasConnected = true
+
+        if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
+            appDelegate.onBeforeSendAcceptEvent(call, action)
+        }
+
         sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ACCEPT, self.data?.toJSON())
 
         // Signal to the system that the action was successfully performed.

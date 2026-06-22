@@ -12,6 +12,8 @@ import CallKit
 
 public protocol CallkitIncomingAppDelegate : NSObjectProtocol {
     
+    func onBeforeSendAcceptEvent(_ call: Call, _ action: CXAnswerCallAction);
+
     func onAccept(_ call: Call, _ action: CXAnswerCallAction);
     
     func onDecline(_ call: Call, _ action: CXEndCallAction);
