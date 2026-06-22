@@ -5,6 +5,12 @@
 * Fix pack mapped data to expose call event, thank @skutimechanic https://github.com/hiennguyen92/flutter_callkit_incoming/pull/823
 * Fix iOS: restore maximumCallGroups config, hold handler, holdCall event, thank @md-riaz https://github.com/hiennguyen92/flutter_callkit_incoming/pull/825
 
+* Fixes `UnrecognizedPropertyException` for fields like on Android.
+* Expose `SwiftFlutterCallkitIncomingPlugin.initCallkitProvider` and support custom `CXProviderConfiguration`.
+* Add `CallkitIncomingAppDelegate.onBeforeSendAcceptEvent` hook
+* Fix `FormatException: [ACTION_CALL_TOGGLE_AUDIO_SESSION] isActive is null`.
+* Fix crash on Android 14+ when `CallkitNotificationService` starts FGS with microphone (SecurityException)
+
 ## 3.1.1
 * Reorganize iOS native source directory to support Swift Package Manager (SPM) by placing all source files inside the package root (`ios/flutter_callkit_incoming/Classes/`).
 * Resolve SPM mixed-language constraint by removing Objective-C wrappers and implementing a pure-Swift registrar class `@objc(FlutterCallkitIncomingPlugin)` to ensure seamless CocoaPods backward compatibility.
