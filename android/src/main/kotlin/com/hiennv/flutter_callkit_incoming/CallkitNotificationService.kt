@@ -130,16 +130,44 @@ class CallkitNotificationService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             var mask = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                mask = mask or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-                if (isVideo) {
+                // On Android 14+ (targetSDK 34+), starting an FGS from the background with
+                // 'microphone' or 'camera' types throws a SecurityException if the runtime
+                // permissions aren't already granted (e.g., during an incoming push while locked).
+                //
+                // To prevent crashes, only append mic/camera types dynamically once the call
+                // is active and permissions are verified. 'phoneCall' type is used initially
+                // as it is exempt for calling apps.
+                //
+                // E/AndroidRuntime(26358): java.lang.RuntimeException: Unable to start service com.hiennv.flutter_callkit_incoming.CallkitNotificationService@43190c0 with Intent { act=com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING xflg=0x4 cmp=com.vcc.bizflycrmapp/com.hiennv.flutter_callkit_incoming.CallkitNotificationService (has extras) }: java.lang.SecurityException: Starting FGS with type microphone callerApp=ProcessRecord{1769db2 26358:com.vcc.bizflycrmapp/u0a998} targetSDK=36 requires permissions: all of the permissions allOf=true [android.permission.FOREGROUND_SERVICE_MICROPHONE] any of the permissions allOf=false [android.permission.CAPTURE_AUDIO_HOTWORD, android.permission.CAPTURE_AUDIO_OUTPUT, android.permission.CAPTURE_MEDIA_OUTPUT, android.permission.CAPTURE_TUNER_AUDIO_INPUT, android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT, android.permission.RECORD_AUDIO]  and the app must be in the eligible state/exemptions to access the foreground only permission
+                // E/AndroidRuntime(26358): Caused by: java.lang.SecurityException: Starting FGS with type microphone callerApp=ProcessRecord targetSDK=36 requires permissions: all of the permissions allOf=true [android.permission.FOREGROUND_SERVICE_MICROPHONE] any of the permissions allOf=false [android.permission.CAPTURE_AUDIO_HOTWORD, android.permission.CAPTURE_AUDIO_OUTPUT, android.permission.CAPTURE_MEDIA_OUTPUT, android.permission.CAPTURE_TUNER_AUDIO_INPUT, android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT, android.permission.RECORD_AUDIO]  and the app must be in the eligible state/exemptions to access the foreground only permission
+                if (isPermissionGranted(Manifest.permission.RECORD_AUDIO)) {
+                    mask = mask or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                }
+                if (isVideo && isPermissionGranted(Manifest.permission.CAMERA)) {
                     mask = mask or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
                 }
             }
-            startForeground(notificationId, notification, mask)
+
+            try {
+                startForeground(notificationId, notification, mask)
+            } catch (e: Exception) {
+                // the mic/camera type was rejected (e.g. background start without exemption).
+                // Showing the call as a plain phoneCall FGS is always preferable to crashing the whole app.
+                e.printStackTrace()
+                startForeground(
+                    notificationId,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                )
+            }
         } else {
             println("About to start foreground notification")
             startForeground(notificationId, notification)
         }
+    }
+
+    private fun isPermissionGranted(permission: String): Boolean {
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
 
 
