@@ -623,7 +623,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
 
         if call.isOnHold == onHold {
-            self.sendMuteEvent(callId.uuidString,  onHold)
+            self.sendHoldEvent(callId.uuidString,  onHold)
         } else {
             self.callManager.holdCall(call: call, onHold: onHold)
         }
@@ -878,8 +878,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     func createConfiguration(_ data: Data) -> CXProviderConfiguration {
         let configuration = CXProviderConfiguration(localizedName: data.appName)
         configuration.supportsVideo = data.supportsVideo
-        configuration.maximumCallGroups = 1
-        configuration.maximumCallsPerCallGroup = 1
+        configuration.maximumCallGroups = data.maximumCallGroups
+        configuration.maximumCallsPerCallGroup = data.maximumCallsPerCallGroup
         
         configuration.supportedHandleTypes = [
             CXHandle.HandleType.generic,
@@ -1099,6 +1099,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         call.isOnHold = action.isOnHold
         call.isMuted = action.isOnHold
 
+        self.callManager.setHold(call: call, onHold: action.isOnHold)
+
         sendEvent(
             SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_HOLD,
             [
@@ -1213,6 +1215,10 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     private func sendMuteEvent(_ id: String, _ isMuted: Bool) {
         self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_MUTE, [ "id": id, "isMuted": isMuted ])
+    }
+    
+    private func sendHoldEvent(_ id: String, _ isOnHold: Bool) {
+        self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_HOLD, [ "id": id, "isOnHold": isOnHold ])
     }
     
     @objc public func sendCallbackEvent(_ data: [String: Any]?) {

@@ -71,15 +71,16 @@ class CallEventActionCallIncoming extends CallEvent {
 }
 
 class CallEventActionCallStart extends CallEvent {
-  const CallEventActionCallStart(this.id);
+  const CallEventActionCallStart(this.callKitParams);
 
   @override
   String get eventName => CallEventConstants.actionCallStart;
 
-  final String id;
+  final CallKitParams callKitParams;
 
   @override
-  String toString() => 'CallEventActionCallStart(id: $id)';
+  String toString() =>
+      'CallEventActionCallStart(callKitParams: $callKitParams)';
 }
 
 class CallEventActionCallAccept extends CallEvent {
@@ -95,27 +96,29 @@ class CallEventActionCallAccept extends CallEvent {
 }
 
 class CallEventActionCallDecline extends CallEvent {
-  const CallEventActionCallDecline(this.id);
+  const CallEventActionCallDecline(this.callKitParams);
 
   @override
   String get eventName => CallEventConstants.actionCallDecline;
 
-  final String id;
+  final CallKitParams callKitParams;
 
   @override
-  String toString() => 'CallEventActionCallDecline(id: $id)';
+  String toString() =>
+      'CallEventActionCallDecline(callKitParams: $callKitParams)';
 }
 
 class CallEventActionCallEnded extends CallEvent {
-  const CallEventActionCallEnded(this.id);
+  const CallEventActionCallEnded(this.callKitParams);
 
   @override
   String get eventName => CallEventConstants.actionCallEnded;
 
-  final String id;
+  final CallKitParams callKitParams;
 
   @override
-  String toString() => 'CallEventActionCallEnded(id: $id)';
+  String toString() =>
+      'CallEventActionCallEnded(callKitParams: $callKitParams)';
 }
 
 class CallEventActionCallTimeout extends CallEvent {
