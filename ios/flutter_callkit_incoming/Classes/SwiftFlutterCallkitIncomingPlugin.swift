@@ -1030,6 +1030,9 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             appDelegate.onAccept(call, action)
         } else {
             action.fulfill()
+
+            call.notifyConnecting()
+            call.notifyConnected()
         }
     }
     
