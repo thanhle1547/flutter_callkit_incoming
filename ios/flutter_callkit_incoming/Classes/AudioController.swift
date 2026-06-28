@@ -39,7 +39,6 @@ class AudioController: NSObject {
                 .allowBluetoothA2DP,
                 // 'allowBluetooth' was deprecated in iOS 8.0: renamed to 'allowBluetoothHFP'
                 .allowBluetoothHFP,
-                .mixWithOthers
             ]
             if duckOthers {
                 options.insert(.duckOthers)
