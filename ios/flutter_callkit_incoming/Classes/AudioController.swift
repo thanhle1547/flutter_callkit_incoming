@@ -19,33 +19,14 @@ class AudioController: NSObject {
     // private var onSpeakerToogled: ((Bool) -> Void)
     private var speakerEnabled: Bool = false
 
-    private var isInitialized: Bool = false
-
     var isMuted: Bool = false {
         didSet {
             engine?.inputNode.volume = isMuted ? 0.0 : 1.0
         }
     }
 
-    init(
-        data: Data?
-        /*
-        onSpeakerActivationChanged: @escaping ((Bool) -> Void)
-        */
-    ) {
-        // onSpeakerToogled = onSpeakerActivationChanged
-
-        super.init()
-
-        setupAudioSession(data: data)
-
-        isInitialized = true
-    }
-
     deinit {
-        NotificationCenter.default.removeObserver(self)
-        isAudioSessionObserved = false
-        isInitialized = false
+        removeAudioSessionObservers()
     }
 
     // MARK: - Setup

@@ -41,7 +41,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     private var sharedProvider: CXProvider? = nil
     
-    private var audioController: AudioController?
+    private let audioController: AudioController = AudioController()
 
     private(set) var outgoingCall : Call?
     private(set) var answerCall : Call?
@@ -522,7 +522,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         callUpdate.localizedCallerName = data.nameCaller
         
         initCallkitProvider(data)
-        audioController?.setupAudioSessionObservers()
         
         // Guard against malformed UUID — see CallManager.swift:startCall for rationale.
         // PushKit call MUST report within ~5s deadline; on invalid UUID we still call
@@ -593,7 +592,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         }
         self.outgoingCallData = data
         initCallkitProvider(data)
-        audioController?.setupAudioSessionObservers()
+        audioController.setupAudioSessionObservers()
         self.callManager.startCall(data)
     }
     
@@ -712,24 +711,14 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     }
     
     func configureAudioSession() {
-        if audioController == nil {
-            Debug.print("Configuring audio session")
+        audioController.setupAudioSessionObservers()
 
-            audioController = AudioController(
-                data: self.data,
-                /*
-                onSpeakerActivationChanged: { on in
-                    self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_SPEAKER, [ "isActivate": on ])
-                }
-                */
-            )
+        let didUpdate = audioController.maybeResetupAudioSession()
+
+        if didUpdate == false {
+            Debug.print("Audio session already configured")
         } else {
-            let didUpdate = audioController?.maybeResetupAudioSession()
-            if didUpdate == false {
-                Debug.print("Audio session already configured")
-            } else {
-                Debug.print("Audio session updated")
-            }
+            Debug.print("Audio session updated")
         }
     }
 
@@ -744,10 +733,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     ///
     /// **Note for Swift callers:** Access the underlying boolean state
     /// using `.boolValue` after unwrapping the optional.
-    @objc public func hasAudioOutput() -> NSNumber? {
-        guard let result = audioController?.hasAudioOutput() else {
-            return nil // Represents nil in Objective-C
-        }
+    @objc public func hasAudioOutput() -> NSNumber {
+        let result = audioController.hasAudioOutput()
         return NSNumber(value: result)
     }
 
@@ -912,7 +899,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     public func activateAudioSession(duckOthers: Bool = true) -> Bool? {
         if data?.configureAudioSession != false {
-            audioController?.setupAudioSession(duckOthers: duckOthers, data: self.data)
+            audioController.setupAudioSession(duckOthers: duckOthers, data: self.data)
         }
 
         return nil
@@ -939,7 +926,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     /*
     public func setSpeaker(_ on: Bool) {
-        audioController?.setSpeaker(on: on)
+        audioController.setSpeaker(on: on)
     }
     */
 
@@ -1203,7 +1190,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             appDelegate.didDeactivateAudioSession(audioSession)
         }
 
-        audioController?.removeAudioSessionObservers()
+        audioController.removeAudioSessionObservers()
 
         if self.outgoingCall?.isOnHold ?? false || self.answerCall?.isOnHold ?? false{
             Debug.print("Call is on hold")
