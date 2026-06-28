@@ -930,6 +930,14 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     }
     */
 
+    public func markSpeakerActive() {
+        audioController.markSpeakerActive()
+    }
+
+    public func markSpeakerInactive() {
+        audioController.markSpeakerInactive()
+    }
+
     // MARK: - CXProviderDelegate
 
     public func providerDidReset(_ provider: CXProvider) {

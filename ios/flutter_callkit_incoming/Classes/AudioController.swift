@@ -190,6 +190,14 @@ class AudioController: NSObject {
         return result
     }
 
+    public func markSpeakerActive() {
+        speakerEnabled = true
+    }
+
+    public func markSpeakerInactive() {
+        speakerEnabled = false
+    }
+
     public func hasAudioOutput() -> Bool {
         let session = AVAudioSession.sharedInstance()
         let currentRoute = session.currentRoute
@@ -380,16 +388,20 @@ class AudioController: NSObject {
             }
         }
 
-        /*
         if speakerEnabled {
+            Debug.print(
+                "Speaker is turned on, does current route outputs contains .builtInSpeaker? \(isSpeakerActive())"
+            )
+
+            /*
             if !isSpeakerActive() {
                 onSpeakerToogled(false)
 
                 Debug.print("Re-active speaker")
                 setSpeaker(on: true)
             }
+            */
         }
-        */
     }
 
     @objc private func handleMediaServerReset() {
