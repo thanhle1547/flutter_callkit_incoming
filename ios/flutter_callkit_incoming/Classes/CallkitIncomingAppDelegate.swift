@@ -16,6 +16,8 @@ public protocol CallkitIncomingAppDelegate : NSObjectProtocol {
 
     func onAccept(_ call: Call, _ action: CXAnswerCallAction);
     
+    func onMuted(_ call: Call, _ action: CXSetMutedCallAction)
+    
     func onDecline(_ call: Call, _ action: CXEndCallAction);
     
     func onEnd(_ call: Call, _ action: CXEndCallAction);

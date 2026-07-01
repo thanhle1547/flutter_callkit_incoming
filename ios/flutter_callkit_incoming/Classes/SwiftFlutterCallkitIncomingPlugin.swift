@@ -1127,7 +1127,11 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
 
         sendMuteEvent(action.callUUID.uuidString, action.isMuted)
 
-        action.fulfill()
+        if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
+            appDelegate.onMuted(call, action)
+        } else {
+            action.fulfill()
+        }
     }
     
     public func provider(_ provider: CXProvider, perform action: CXSetGroupCallAction) {
