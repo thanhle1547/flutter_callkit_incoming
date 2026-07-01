@@ -194,6 +194,10 @@ class CallManager: NSObject {
         return calls[idx]
     }
 
+    public func isCallConnected(_ call: Call) -> Bool {
+        return call.hasConnected
+    }
+
     public func didCallWithUuidEnd(_ uuid: UUID) -> Bool {
         let containsInSet = endCallIds.contains(uuid)
         return containsInSet

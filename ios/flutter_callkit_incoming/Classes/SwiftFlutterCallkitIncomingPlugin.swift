@@ -705,6 +705,11 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         return self.callManager.calls
     }
     
+    @objc public func isCallConnected(_ call: Call) -> NSNumber {
+        let result = self.callManager.isCallConnected(call)
+        return NSNumber(value: result)
+    }
+
     @objc public func endAllCalls() {
         self.isFromPushKit = false
         self.callManager.endCallAlls()
