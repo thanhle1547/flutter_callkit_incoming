@@ -16,6 +16,8 @@ class AudioController: NSObject {
     private var isAudioChainBeingReconstructed = false
     private var isAudioSessionObserved = false
 
+    private var interruptionStartTime: Date?
+
     // private var onSpeakerToogled: ((Bool) -> Void)
     private var speakerEnabled: Bool = false
 
@@ -272,13 +274,53 @@ class AudioController: NSObject {
             return
         }
 
-        if type == .ended {
-            if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
-                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
-                if options.contains(.shouldResume) {
-                    try? AVAudioSession.sharedInstance().setActive(true)
+        if type == .began {
+            interruptionStartTime = Date()
+
+            var reasonName: String = "<unavailable>"
+            if #available(iOS 14.5, *) {
+                let reason = (userInfo[AVAudioSessionInterruptionReasonKey] as? UInt)
+                    .flatMap { AVAudioSession.InterruptionReason(rawValue: $0) }
+
+                switch reason {
+                    case .default:
+                        reasonName = ".default"
+                    case .builtInMicMuted:
+                        reasonName = ".builtInMicMuted"
+                    case .routeDisconnected:
+                        reasonName = ".routeDisconnected"
+                    case .none:
+                        reasonName = ".none"
+                    case .some(.appWasSuspended):
+                        reasonName = ".appWasSuspended"
+                    case .some(_):
+                        reasonName = "<unknow>"
                 }
             }
+
+            Debug.print("🔇 Route Interruption: .begin - Reason: \(reasonName)")
+        } else if type == .ended {
+            let shouldResume = (userInfo[AVAudioSessionInterruptionOptionKey] as? UInt)
+                .map { AVAudioSession.InterruptionOptions(rawValue: $0).contains(.shouldResume) } ?? false
+
+            // Calculate interruption duration
+            let interruptionDuration = interruptionStartTime.map { Date().timeIntervalSince($0) } ?? 0
+
+            var message = "🔊 Route Interruption: .ended - Duration: \(interruptionDuration)s, ShouldResume: \(shouldResume)"
+
+            let session = AVAudioSession.sharedInstance()
+
+            if shouldResume {
+                message += "-> setActive"
+                try? session.setActive(true)
+            }
+
+            message += ", Volume: \(session.outputVolume)"
+
+            Debug.print(message)
+
+            // Clear interruption tracking
+            interruptionStartTime = nil
         }
     }
 
