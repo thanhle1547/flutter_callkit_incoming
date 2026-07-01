@@ -36,7 +36,19 @@ class AudioController: NSObject {
         
         do {
             var options: AVAudioSession.CategoryOptions = [
-                .allowBluetoothA2DP,
+                // Avoid using .allowBluetoothA2DP with .playAndRecord because A2DP is an output-only profile.
+                // When using A2DP alone, iOS prioritizes high-quality playback and cannot receive input from
+                // the Bluetooth microphone, causing a silent/empty mic or forcing a fallback to the device's built-in mic.
+                //
+                // Avoid combining .allowBluetoothA2DP and .allowBluetooth with .playAndRecord.
+                // While this flags iOS to dynamically switch between A2DP (playback) and HFP (recording),
+                // this automatic transition often introduces latency and routing conflicts. This can result in
+                // crackling audio, temporary mic dropouts, or audio not being transmitted to the other end.
+                //
+                // Solution: Remove .allowBluetoothA2DP entirely and keep only .allowBluetooth to enforce
+                // a stable, constant HFP profile for reliable bidirectional audio.
+                // .allowBluetoothA2DP,
+
                 // 'allowBluetooth' was deprecated in iOS 8.0: renamed to 'allowBluetoothHFP'
                 .allowBluetoothHFP,
             ]
