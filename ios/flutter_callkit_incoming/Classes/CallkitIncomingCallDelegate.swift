@@ -8,5 +8,5 @@
 import CallKit
 
 public protocol CallkitIncomingCallDelegate : NSObjectProtocol {
-    func startCall(_ call: Call, _ action: CXStartCallAction, _ onFulfill: (() -> Void));
+    func startCall(_ call: Call, _ action: CXStartCallAction, _ onFulfill: @escaping (() -> Void));
 }
