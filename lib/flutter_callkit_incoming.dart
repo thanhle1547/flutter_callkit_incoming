@@ -472,15 +472,15 @@ class FlutterCallkitIncoming {
   }
 
   static DTMFActionType? toDTMFActionType(Map data) {
-    final type = data['type'] as String?;
+    final type = data['type'] as int?;
     if (type == null) return null;
 
     switch (type) {
-      case 'singleTone':
+      case 1:
         return DTMFActionType.singleTone;
-      case 'softPause':
+      case 2:
         return DTMFActionType.softPause;
-      case 'hardPause':
+      case 3:
         return DTMFActionType.hardPause;
       default:
         return null;
