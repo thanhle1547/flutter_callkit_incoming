@@ -728,6 +728,11 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         return NSNumber(value: result)
     }
 
+    @objc public func isCallEnded(_ call: Call) -> NSNumber {
+        let result = self.callManager.isCallEnded(call)
+        return NSNumber(value: result)
+    }
+
     @objc public func endAllCalls() {
         self.isFromPushKit = false
         self.callManager.endCallAlls()
@@ -1133,13 +1138,20 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     /// Triggered when a user or the system attempts to end a call, such as tapping the "End" button on the CallKit UI
     public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+        // Retrieve the Call instance corresponding to the action's call UUID
+        let call = self.callManager.callWithUUID(uuid: action.callUUID)
+
         if self.callManager.didCallWithUuidEnd(action.callUUID) {
             action.fulfill()
+
+            if let call = call {
+                call.notifyEnded()
+            }
+
             return
         }
 
-        // Retrieve the Call instance corresponding to the action's call UUID
-        guard let call = self.callManager.callWithUUID(uuid: action.callUUID) else {
+        guard let call = call else {
             if (self.answerCall == nil && self.outgoingCall == nil) {
                 sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TIMEOUT, self.data?.toJSON())
             } else {

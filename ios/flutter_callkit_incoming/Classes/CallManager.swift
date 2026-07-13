@@ -210,6 +210,10 @@ class CallManager: NSObject {
         return call.hasConnected
     }
 
+    public func isCallEnded(_ call: Call) -> Bool {
+        return call.hasEnded
+    }
+
     public func didCallWithUuidEnd(_ uuid: UUID) -> Bool {
         let containsInSet = endCallIds.contains(uuid)
         return containsInSet
