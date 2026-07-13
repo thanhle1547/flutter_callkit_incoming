@@ -116,6 +116,10 @@ public class Call: NSObject {
     }
     
     public func notifyEnded() {
+        if hasEnded {
+            return
+        }
+
         hasEnded = true
     }
 }
