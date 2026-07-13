@@ -194,6 +194,18 @@ class CallManager: NSObject {
         return calls[idx]
     }
 
+    func cxCallWithUUID(uuid: UUID) -> CXCall? {
+        let calls = callController.callObserver.calls
+        for call in calls {
+            let callItem = self.callWithUUID(uuid: call.uuid)
+            if (callItem != nil) {
+                return call
+            }
+        }
+
+        return nil
+    }
+
     public func isCallConnected(_ call: Call) -> Bool {
         return call.hasConnected
     }

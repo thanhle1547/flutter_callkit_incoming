@@ -378,6 +378,24 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             }
             result(nil)
             break;
+        case "maybeReportCallUnanswered":
+            guard let args = call.arguments as? [String: Any],
+                  let uuid = args["uuid"] as? String? else {
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
+                return
+            }
+
+            if let uuid = uuid {
+                self.maybeReportCallUnanswered(uuid)
+            }
+            result(nil)
+            break;
         case "getDevicePushTokenVoIP":
             result(self.getDevicePushTokenVoIP())
             break;
@@ -842,6 +860,37 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     /// Notifies the provider that an incoming call unanswered.
     public func reportCallUnanswered(_ uuid: String) {
         self.saveEndCall(uuid, 3)
+        // sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_UNANSWERED, data.toJSON())
+    }
+
+    /// Notifies the provider that an incoming call unanswered.
+    public func maybeReportCallUnanswered(_ uuidString: String) {
+        // Retrieve the Call instance corresponding to the action's call UUID.
+        guard let uuid = UUID(uuidString: uuidString),
+              let cxCall = self.callManager.cxCallWithUUID(uuid: uuid) else {
+            Debug.print("No CXCall has uuid \(uuidString); aborting Unanswered report")
+            return
+        }
+
+        if cxCall.hasEnded {
+            Debug.print("Call \(uuidString) has ended; aborting Unanswered report")
+            return
+        }
+
+        if cxCall.isOutgoing {
+            Debug.print("Call \(uuidString) is Outgoing; aborting Unanswered report")
+            return
+        }
+
+        if cxCall.hasConnected {
+            Debug.print("Call \(uuidString) is already connected; forcing Failed report and skipping Unanswered")
+            self.saveEndCall(uuidString, 1)
+        } else {
+            Debug.print("Call \(uuidString) is not yet connected; reporting Unanswered")
+            self.saveEndCall(uuidString, 3)
+        }
+
+        self.saveEndCall(uuidString, 3)
         // sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_UNANSWERED, data.toJSON())
     }
 
