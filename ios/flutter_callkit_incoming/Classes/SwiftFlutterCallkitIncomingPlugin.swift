@@ -894,6 +894,39 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         // sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_UNANSWERED, data.toJSON())
     }
 
+    /// Notifies the provider that a call disconnected.
+    public func maybeReportCallDisconnected(_ uuidString: String) {
+        // Retrieve the Call instance corresponding to the action's call UUID.
+        guard let uuid = UUID(uuidString: uuidString),
+              let cxCall = self.callManager.cxCallWithUUID(uuid: uuid) else {
+            Debug.print("No CXCall has uuid \(uuidString); aborting End report")
+            return
+        }
+
+        if cxCall.hasEnded {
+            Debug.print("Call \(uuidString) has ended; aborting End report")
+            return
+        }
+
+        if cxCall.hasConnected {
+            if cxCall.isOutgoing {
+                Debug.print("Call \(uuidString) is Outgoing and already connected; reporting Remote End")
+            } else {
+                Debug.print("Call \(uuidString) is Incoming and already connected; reporting Remote End")
+            }
+
+            self.saveEndCall(uuidString, 2)
+        } else {
+            if cxCall.isOutgoing {
+                Debug.print("Call \(uuidString) is Outgoing and not yet connected; reporting Unanswered")
+            } else {
+                Debug.print("Call \(uuidString) is Incoming and not yet connected; reporting Unanswered")
+            }
+
+            self.saveEndCall(uuidString, 3)
+        }
+    }
+
     public func initCallkitProvider(_ data: Data) {
         if(self.sharedProvider == nil){
             self.sharedProvider = CXProvider(configuration: createConfiguration(data))
