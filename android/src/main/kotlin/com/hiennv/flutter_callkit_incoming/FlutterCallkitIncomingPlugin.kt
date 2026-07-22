@@ -48,6 +48,8 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         private val eventHandlers = mutableMapOf<BinaryMessenger, EventCallbackHandler>()
         private val eventCallbacks = mutableListOf<WeakReference<CallkitEventCallback>>()
 
+        private val eventQueue = ArrayList<Pair<String, Map<String, Any?>>>()
+
         fun sendEvent(event: String, body: Map<String, Any?>) {
             send(event, body)
         }
@@ -85,6 +87,11 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             } else if (CallkitBackgroundExecutor.registered) {
                 Log.d(TAG, "Sending background event: $event (no UI handlers)")
                 CallkitBackgroundExecutor.send(event, body)
+            } else {
+                Log.d(TAG, "Schedule sending event: $event (no UI handlers, no background executor)")
+                synchronized(eventQueue) {
+                    eventQueue.add(Pair(event, body))
+                }
             }
         }
 
@@ -512,6 +519,49 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
 
         override fun onListen(arguments: Any?, sink: EventChannel.EventSink) {
             eventSink = sink
+
+            Log.d(TAG, "Drain the buffered events")
+            // Drain the buffered events to the newly registered UI listener
+            synchronized(eventQueue) {
+                // 1. Scan the buffer to see if the call has already been answered, declined, or ended
+                val isIncoming = eventQueue.any {
+                    it.first.endsWith(CallkitConstants.ACTION_CALL_INCOMING)
+                }
+                val hasAccept = eventQueue.any {
+                    it.first.endsWith(CallkitConstants.ACTION_CALL_ACCEPT)
+                }
+                val hasDecline = eventQueue.any {
+                    it.first.endsWith(CallkitConstants.ACTION_CALL_DECLINE)
+                }
+                val hasEnded = eventQueue.any {
+                    it.first.endsWith(CallkitConstants.ACTION_CALL_ENDED)
+                }
+
+                val iterator = eventQueue.iterator()
+                while (iterator.hasNext()) {
+                    val (event, body) = iterator.next()
+
+                    // 2. Create a mutable copy of the main body map
+                    val mutableBody = body.toMutableMap()
+
+                    // 3. Cast and copy the nested "extra" map (or create a new one if it's null)
+                    @Suppress("UNCHECKED_CAST")
+                    val extraMap = (mutableBody["extra"] as? Map<String, Any?>)?.toMutableMap() ?: mutableMapOf()
+
+                    // 4. Insert the buffered mark
+                    if (isIncoming) extraMap["hasBufferedIncoming"] = true
+                    if (hasAccept) extraMap["hasBufferedAccept"] = true
+                    if (hasDecline) extraMap["hasBufferedDecline"] = true
+                    if (hasEnded) extraMap["hasBufferedEnded"] = true
+
+                    mutableBody["extra"] = extraMap
+
+                    // 5. Send the updated body
+                    // Will now succeed since hasListener() is true
+                    send(event, mutableBody)
+                    iterator.remove()
+                }
+            }
         }
 
         fun send(event: String, body: Map<String, Any?>) {
