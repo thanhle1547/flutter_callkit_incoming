@@ -877,6 +877,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     /// Use this when an external event causes the call to terminate before it is answered.
     public func reportCallFailed(_ data: flutter_callkit_incoming.Data) {
         self.saveEndCall(data.uuid, 1)
+        data.didReportCallEndReasonAsFailed = true
         sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_FAILED, data.toJSON())
     }
 

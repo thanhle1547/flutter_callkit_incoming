@@ -177,6 +177,8 @@ public class Call: NSObject {
     @objc public var callingNotificationSubtitle: String
     @objc public var callingNotificationHangupText: String
     @objc public var isShowHangup: Bool = true
+
+    @objc public var didReportCallEndReasonAsFailed: Bool = false
     
     @objc public init(id: String, nameCaller: String, phoneNumber: String, handle: String, type: Int) {
         self.uuid = id
@@ -356,7 +358,8 @@ public class Call: NSObject {
             "showNotification": isShowCallingNotification,
             "subtitle": callingNotificationSubtitle,
             "callbackText": callingNotificationHangupText,
-            "isShowCallback": isShowHangup
+            "isShowCallback": isShowHangup,
+            "didReportCallEndReasonAsFailed": didReportCallEndReasonAsFailed,
         ]
         let ios: [String : Any] = [
             "iconName": iconName,
