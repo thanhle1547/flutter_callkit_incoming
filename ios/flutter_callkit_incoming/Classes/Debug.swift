@@ -27,12 +27,22 @@ class Debug {
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+        // Lock the formatter's timezone to UTC
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         return formatter
     }()
     static func getTime() -> String {
-        let currentDate = Date()
-        return dateFormatter.string(from: currentDate)
+        var timeValue = timeval()
+        // Call the kernel API to fetch high-precision hardware time
+        gettimeofday(&timeValue, nil)
+
+        // Date(timeIntervalSince1970:) naturally creates a UTC-based timestamp
+        let preciseDate = Date(timeIntervalSince1970: Double(timeValue.tv_sec))
+        let microseconds = timeValue.tv_usec
+
+        let dateString = dateFormatter.string(from: preciseDate)
+        return String(format: "%@.%06d", dateString, microseconds)
     }
 
     static public func print(_ object: String) {
