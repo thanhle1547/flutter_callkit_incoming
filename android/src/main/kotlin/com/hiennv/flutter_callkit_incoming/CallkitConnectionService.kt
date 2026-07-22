@@ -58,6 +58,7 @@ class CallkitConnectionService : ConnectionService() {
 
         Log.d(TAG, "onCreateIncomingConnection id=$callId caller=${data.nameCaller}")
 
+        // Create a connection instance representing the call
         val connection = CallkitConnection(callId, callBundle).apply {
             if (data.nameCaller.isNotEmpty()) {
                 setCallerDisplayName(data.nameCaller, TelecomManager.PRESENTATION_ALLOWED)
@@ -67,6 +68,12 @@ class CallkitConnectionService : ConnectionService() {
                 Uri.fromParts("tel", handle, null),
                 TelecomManager.PRESENTATION_ALLOWED,
             )
+            setCallerDisplayName(
+                data.nameCaller,
+                TelecomManager.PRESENTATION_ALLOWED,
+            )
+
+            // Tell the OS the call is ringing
             setRinging()
         }
         return connection
