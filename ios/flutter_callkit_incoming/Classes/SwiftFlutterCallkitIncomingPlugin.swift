@@ -1386,17 +1386,30 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
 
 class EventCallbackHandler: NSObject, FlutterStreamHandler {
     private var eventSink: FlutterEventSink?
+    private var queuedEvents: [[String: Any]] = []
     
     public func send(_ event: String, _ body: Any) {
         let data: [String : Any] = [
             "event": event,
             "body": body
         ]
-        eventSink?(data)
+
+        if let eventSink = self.eventSink {
+            eventSink(data)
+        } else {
+            self.queuedEvents.append(data)
+        }
     }
     
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         self.eventSink = events
+
+        // Flush any queued events to the new listener
+        for event in queuedEvents {
+            events(event)
+        }
+        queuedEvents.removeAll()
+
         return nil
     }
     
