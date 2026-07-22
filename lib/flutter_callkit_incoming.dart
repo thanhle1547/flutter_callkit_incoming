@@ -207,6 +207,13 @@ class FlutterCallkitIncoming {
     );
   }
 
+  static Future<void> maybeReportCallDisconnected(String uuid) async {
+    await _channel.invokeMethod(
+      "maybeReportCallDisconnected",
+      { "uuid": uuid },
+    );
+  }
+
   /// Get active calls.
   /// On iOS: return active calls from Callkit.
   /// On Android: only return last call

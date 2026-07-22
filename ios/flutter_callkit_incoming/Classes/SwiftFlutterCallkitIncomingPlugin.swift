@@ -396,6 +396,24 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             }
             result(nil)
             break;
+        case "maybeReportCallDisconnected":
+            guard let args = call.arguments as? [String: Any],
+                  let uuid = args["uuid"] as? String? else {
+                result(
+                    FlutterError(
+                        code: "invalid_error",
+                        message: "Invalid arguments",
+                        details: nil
+                    )
+                )
+                return
+            }
+
+            if let uuid = uuid {
+                self.maybeReportCallDisconnected(uuid)
+            }
+            result(nil)
+            break;
         case "getDevicePushTokenVoIP":
             result(self.getDevicePushTokenVoIP())
             break;
