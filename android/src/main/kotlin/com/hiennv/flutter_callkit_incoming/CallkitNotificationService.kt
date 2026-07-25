@@ -137,7 +137,7 @@ class CallkitNotificationService : Service() {
 
     private fun showIncomingCallNotification(bundle: Bundle) {
         val callkitNotification =
-            getCallkitNotificationManager()?.getIncomingNotification(bundle)
+            getCallkitNotificationManager()?.getIncomingNotification(bundle, true)
 
         if (callkitNotification != null) {
             val typeCall = bundle.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)

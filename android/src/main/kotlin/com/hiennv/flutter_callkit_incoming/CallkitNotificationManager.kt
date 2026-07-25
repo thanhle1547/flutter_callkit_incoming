@@ -179,7 +179,7 @@ class CallkitNotificationManager(
     }
 
     @SuppressLint("MissingPermission", "FullScreenIntentPolicy")
-    fun getIncomingNotification(data: Bundle): CallkitNotification? {
+    fun getIncomingNotification(data: Bundle, fromForegroundService: Boolean = false): CallkitNotification? {
         data.putLong(EXTRA_TIME_START_CALL, System.currentTimeMillis())
 
         val notificationId =
@@ -188,6 +188,11 @@ class CallkitNotificationManager(
         val pendingIntent = getActivityPendingIntent(notificationId, data)
         notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_INCOMING)
         notificationBuilder?.setChannelId(NOTIFICATION_CHANNEL_ID_INCOMING)
+        if (fromForegroundService) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                notificationBuilder?.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            }
+        }
         notificationBuilder?.setDefaults(NotificationCompat.DEFAULT_VIBRATE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notificationBuilder?.setCategory(NotificationCompat.CATEGORY_CALL)
