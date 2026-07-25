@@ -877,14 +877,9 @@ class CallkitNotificationManager(
         }
 
         if (isForegroundNotification) {
-            CallkitNotificationService.startServiceWithAction(
-                context,
-                CallkitConstants.ACTION_CALL_DECLINE,
-                data
-            )
-        } else {
-            getNotificationManager().cancel(notificationId)
+            CallkitNotificationService.stopService(context)
         }
+        getNotificationManager().cancel(notificationId)
         targetInComingAvatarDefault?.let {
             targetInComingAvatarDefault?.isCancelled = true
             targetInComingAvatarDefault = null

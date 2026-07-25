@@ -1,10 +1,12 @@
 package com.hiennv.flutter_callkit_incoming
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Bundle
@@ -18,22 +20,37 @@ class CallkitNotificationService : Service() {
         private val ActionForeground = listOf(
             CallkitConstants.ACTION_CALL_START,
             CallkitConstants.ACTION_CALL_INCOMING,
-            CallkitConstants.ACTION_CALL_ACCEPT,
-            CallkitConstants.ACTION_CALL_DECLINE
+            CallkitConstants.ACTION_CALL_ACCEPT
         )
 
 
         fun startServiceWithAction(context: Context, action: String, data: Bundle?) {
+            if (action == CallkitConstants.ACTION_CALL_DECLINE) {
+                stopService(context)
+                return
+            }
+
             val intent = Intent(context, CallkitNotificationService::class.java).apply {
                 this.action = action
                 putExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA, data)
             }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && intent.action in ActionForeground) {
                 data?.let {
                     if(it.getBoolean(CallkitConstants.EXTRA_CALLKIT_CALLING_SHOW, true)) {
-                        ContextCompat.startForegroundService(context, intent)
+                        try {
+                            ContextCompat.startForegroundService(context, intent)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }else {
                         context.startService(intent)
+                    }
+                } ?: run {
+                    try {
+                        ContextCompat.startForegroundService(context, intent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
             } else {
@@ -92,6 +109,12 @@ class CallkitNotificationService : Service() {
                 }
         }
         if (intent?.action === CallkitConstants.ACTION_CALL_DECLINE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
             stopSelf()
         }
         return START_STICKY
