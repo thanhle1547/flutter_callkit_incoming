@@ -481,6 +481,9 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             instance.callkitNotificationManager?.destroy()
             instance.callkitSoundPlayerManager = null
             instance.callkitNotificationManager = null
+            synchronized(eventQueue) {
+                eventQueue.clear()
+            }
         }
         Log.d(TAG, "onDetachedFromEngine")
     }
