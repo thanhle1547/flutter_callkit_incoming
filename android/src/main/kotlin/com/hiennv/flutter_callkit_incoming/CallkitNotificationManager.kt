@@ -208,7 +208,6 @@ class CallkitNotificationManager(
             )
         )
         notificationBuilder?.setOnlyAlertOnce(true)
-        notificationBuilder?.setSound(null)
         if (canUseFullScreenIntent()) {
             notificationBuilder?.setFullScreenIntent(
                 pendingIntent, true
@@ -943,7 +942,6 @@ class CallkitNotificationManager(
             getNotificationManager().apply {
                 var channelCall = getNotificationChannel(NOTIFICATION_CHANNEL_ID_INCOMING)
                 if (channelCall != null) {
-                    channelCall.setSound(null, null)
                 } else {
                     channelCall = NotificationChannel(
                         NOTIFICATION_CHANNEL_ID_INCOMING,
@@ -955,7 +953,6 @@ class CallkitNotificationManager(
                         lightColor = Color.RED
                         enableLights(true)
                         enableVibration(true)
-                        setSound(null, null)
                     }
                 }
                 channelCall.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
