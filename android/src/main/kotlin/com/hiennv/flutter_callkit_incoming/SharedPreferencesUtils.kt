@@ -2,7 +2,6 @@ package com.hiennv.flutter_callkit_incoming
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import com.fasterxml.jackson.core.type.TypeReference
 
 
@@ -36,7 +35,7 @@ fun addCall(context: Context?, data: Data, isAccepted: Boolean = false) {
 
 fun removeCall(context: Context?, data: Data) {
     val json = getString(context, "ACTIVE_CALLS", "[]")
-    Log.d("JSON", json!!)
+    Debug.sendDebugLog("JSON", json!!)
     val arrayData: ArrayList<Data> = Utils.getGsonInstance()
         .readValue(json, object : TypeReference<ArrayList<Data>>() {})
     arrayData.remove(data)

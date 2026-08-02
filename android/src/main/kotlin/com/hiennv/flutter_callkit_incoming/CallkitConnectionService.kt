@@ -9,7 +9,6 @@ import android.telecom.ConnectionService
 import android.telecom.DisconnectCause
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
-import android.util.Log
 import androidx.annotation.RequiresApi
 
 /**
@@ -45,18 +44,18 @@ class CallkitConnectionService : ConnectionService() {
         request: ConnectionRequest?,
     ): Connection {
         val callBundle = extractCallBundle(request?.extras) ?: run {
-            Log.w(TAG, "onCreateIncomingConnection: missing call bundle")
+            Debug.sendWarnLog(TAG, "onCreateIncomingConnection: missing call bundle")
             return failed("Missing call data")
         }
 
         val data = Data.fromBundle(callBundle)
         val callId = data.id
         if (callId.isEmpty()) {
-            Log.w(TAG, "onCreateIncomingConnection: empty call id")
+            Debug.sendWarnLog(TAG, "onCreateIncomingConnection: empty call id")
             return failed("Empty call id")
         }
 
-        Log.d(TAG, "onCreateIncomingConnection id=$callId caller=${data.nameCaller}")
+        Debug.sendDebugLog(TAG, "onCreateIncomingConnection id=$callId caller=${data.nameCaller}")
 
         // Create a connection instance representing the call
         val connection = CallkitConnection(callId, callBundle).apply {
@@ -84,7 +83,7 @@ class CallkitConnectionService : ConnectionService() {
         request: ConnectionRequest?,
     ) {
         super.onCreateIncomingConnectionFailed(connectionManagerPhoneAccount, request)
-        Log.w(TAG, "onCreateIncomingConnectionFailed")
+        Debug.sendWarnLog(TAG, "onCreateIncomingConnectionFailed")
     }
 
     override fun onCreateOutgoingConnection(
@@ -92,18 +91,18 @@ class CallkitConnectionService : ConnectionService() {
         request: ConnectionRequest?,
     ): Connection {
         val callBundle = extractCallBundle(request?.extras) ?: run {
-            Log.w(TAG, "onCreateOutgoingConnection: missing call bundle")
+            Debug.sendWarnLog(TAG, "onCreateOutgoingConnection: missing call bundle")
             return failed("Missing call data")
         }
 
         val data = Data.fromBundle(callBundle)
         val callId = data.id
         if (callId.isEmpty()) {
-            Log.w(TAG, "onCreateOutgoingConnection: empty call id")
+            Debug.sendWarnLog(TAG, "onCreateOutgoingConnection: empty call id")
             return failed("Empty call id")
         }
 
-        Log.d(TAG, "onCreateOutgoingConnection id=$callId callee=${data.nameCaller}")
+        Debug.sendDebugLog(TAG, "onCreateOutgoingConnection id=$callId callee=${data.nameCaller}")
 
         val connection = CallkitConnection(callId, callBundle).apply {
             if (data.nameCaller.isNotEmpty()) {
@@ -124,7 +123,7 @@ class CallkitConnectionService : ConnectionService() {
         request: ConnectionRequest?,
     ) {
         super.onCreateOutgoingConnectionFailed(connectionManagerPhoneAccount, request)
-        Log.w(TAG, "onCreateOutgoingConnectionFailed")
+        Debug.sendWarnLog(TAG, "onCreateOutgoingConnectionFailed")
     }
 
     private fun extractCallBundle(extras: Bundle?): Bundle? {

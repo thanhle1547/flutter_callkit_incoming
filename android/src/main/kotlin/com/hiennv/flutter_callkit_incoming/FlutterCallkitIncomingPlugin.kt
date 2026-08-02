@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.annotation.NonNull
 import com.hiennv.flutter_callkit_incoming.Utils.Companion.reapCollection
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -82,13 +81,13 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         private fun send(event: String, body: Map<String, Any?>) {
             val uiHandlers = eventHandlers.values.filter { it.hasListener() }
             if (uiHandlers.isNotEmpty()) {
-                Log.d(TAG, "Sending UI event: $event")
+                Debug.sendDebugLog(TAG, "Sending UI event: $event")
                 uiHandlers.forEach { it.send(event, body) }
             } else if (CallkitBackgroundExecutor.registered) {
-                Log.d(TAG, "Sending background event: $event (no UI handlers)")
+                Debug.sendDebugLog(TAG, "Sending background event: $event (no UI handlers)")
                 CallkitBackgroundExecutor.send(event, body)
             } else {
-                Log.d(TAG, "Schedule sending event: $event (no UI handlers, no background executor)")
+                Debug.sendDebugLog(TAG, "Schedule sending event: $event (no UI handlers, no background executor)")
                 synchronized(eventQueue) {
                     eventQueue.add(Pair(event, body))
                 }
@@ -485,7 +484,7 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 eventQueue.clear()
             }
         }
-        Log.d(TAG, "onDetachedFromEngine")
+        Debug.sendDebugLog(TAG, "onDetachedFromEngine")
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -523,7 +522,7 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         override fun onListen(arguments: Any?, sink: EventChannel.EventSink) {
             eventSink = sink
 
-            Log.d(TAG, "Drain the buffered events")
+            Debug.sendDebugLog(TAG, "Drain the buffered events")
             // Drain the buffered events to the newly registered UI listener
             synchronized(eventQueue) {
                 // 1. Scan the buffer to see if the call has already been answered, declined, or ended

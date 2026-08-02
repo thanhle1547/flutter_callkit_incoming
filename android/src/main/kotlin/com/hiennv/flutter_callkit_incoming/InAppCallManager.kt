@@ -6,7 +6,6 @@ import android.os.Build
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
-import android.util.Log
 import androidx.annotation.RequiresApi
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -29,7 +28,7 @@ class InAppCallManager(private val context: Context) {
             .build()
 
         telecomManager.registerPhoneAccount(phoneAccount)
-        Log.d(TAG, "PhoneAccount registered.")
+        Debug.sendDebugLog(TAG, "PhoneAccount registered.")
     }
 
     fun unregisterPhoneAccount() {
@@ -38,7 +37,7 @@ class InAppCallManager(private val context: Context) {
         val handle = PhoneAccountHandle(componentName, ACCOUNT_ID)
 
         telecomManager.unregisterPhoneAccount(handle)
-        Log.d(TAG, "PhoneAccount unregistered.")
+        Debug.sendDebugLog(TAG, "PhoneAccount unregistered.")
     }
 
     fun getPhoneAccountHandle(): PhoneAccountHandle {

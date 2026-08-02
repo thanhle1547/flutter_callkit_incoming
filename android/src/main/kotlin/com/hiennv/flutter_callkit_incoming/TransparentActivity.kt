@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 
 class TransparentActivity : Activity() {
 
@@ -35,7 +34,7 @@ class TransparentActivity : Activity() {
 
         val action = intent.action
         if (action == null) {
-            Log.w("TransparentActivity", "Intent action is null, finishing activity")
+            Debug.sendWarnLog("TransparentActivity", "Intent action is null, finishing activity")
             finish()
             return
         }

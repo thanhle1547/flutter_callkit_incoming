@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.telecom.TelecomManager
-import android.util.Log
 import androidx.core.content.ContextCompat
 
 class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
@@ -122,13 +121,13 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
         } ?: return
         if (parsed.id.isEmpty()) return
         if (CallkitConnection.find(parsed.id) != null) {
-            Log.d(TAG, "Telecom call already registered id=${parsed.id} — skip")
+            Debug.sendDebugLog(TAG, "Telecom call already registered id=${parsed.id} — skip")
             return
         }
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.MANAGE_OWN_CALLS)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.w(TAG, "MANAGE_OWN_CALLS not granted — Telecom incoming skipped")
+            Debug.sendWarnLog(TAG, "MANAGE_OWN_CALLS not granted — Telecom incoming skipped")
             return
         }
         val telecom = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager ?: return
@@ -143,11 +142,11 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
         }
         try {
             telecom.addNewIncomingCall(handle, extras)
-            Log.d(TAG, "Telecom addNewIncomingCall id=${parsed.id}")
+            Debug.sendDebugLog(TAG, "Telecom addNewIncomingCall id=${parsed.id}")
         } catch (e: SecurityException) {
-            Log.w(TAG, "Telecom addNewIncomingCall rejected: ${e.message}")
+            Debug.sendWarnLog(TAG, "Telecom addNewIncomingCall rejected: ${e.message}")
         } catch (e: Exception) {
-            Log.w(TAG, "Telecom addNewIncomingCall error: ${e.message}")
+            Debug.sendWarnLog(TAG, "Telecom addNewIncomingCall error: ${e.message}")
         }
     }
 
@@ -173,7 +172,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
         val action = intent.action ?: return
         val data = intent.extras?.getBundle(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA) ?: return
 
-        Log.d(TAG, action)
+        Debug.sendDebugLog(TAG, action)
 
         when (action) {
             "${context.packageName}.${CallkitConstants.ACTION_CALL_INCOMING}" -> {
@@ -198,7 +197,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                         addCall(context, incomingData)
                     }
                 } catch (error: Exception) {
-                    Log.e(TAG, null, error)
+                    Debug.sendErrorException(TAG, error)
                 }
             }
 
@@ -213,7 +212,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                     sendEventFlutter(CallkitConstants.ACTION_CALL_START, data)
                     addCall(context, Data.fromBundle(data), true)
                 } catch (error: Exception) {
-                    Log.e(TAG, null, error)
+                    Debug.sendErrorException(TAG, error)
                 }
             }
 
@@ -231,7 +230,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                     addCall(context, Data.fromBundle(data), true)
                     FlutterCallkitIncomingPlugin.acceptCallHandleCallback(data)
                 } catch (error: Exception) {
-                    Log.e(TAG, null, error)
+                    Debug.sendErrorException(TAG, error)
                 }
             }
 
@@ -244,7 +243,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                     sendEventFlutter(CallkitConstants.ACTION_CALL_DECLINE, data)
                     removeCall(context, Data.fromBundle(data))
                 } catch (error: Exception) {
-                    Log.e(TAG, null, error)
+                    Debug.sendErrorException(TAG, error)
                 }
             }
 
@@ -258,7 +257,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                     sendEventFlutter(CallkitConstants.ACTION_CALL_ENDED, data)
                     removeCall(context, Data.fromBundle(data))
                 } catch (error: Exception) {
-                    Log.e(TAG, null, error)
+                    Debug.sendErrorException(TAG, error)
                 }
             }
 
@@ -272,7 +271,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                     sendEventFlutter(CallkitConstants.ACTION_CALL_TIMEOUT, data)
                     removeCall(context, Data.fromBundle(data))
                 } catch (error: Exception) {
-                    Log.e(TAG, null, error)
+                    Debug.sendErrorException(TAG, error)
                 }
             }
 
@@ -282,7 +281,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                     getCallkitNotificationManager()?.showOngoingCallNotification(data, true)
                     sendEventFlutter(CallkitConstants.ACTION_CALL_CONNECTED, data)
                 } catch (error: Exception) {
-                    Log.e(TAG, null, error)
+                    Debug.sendErrorException(TAG, error)
                 }
             }
 
@@ -295,7 +294,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                         context.sendBroadcast(closeNotificationPanel)
                     }
                 } catch (error: Exception) {
-                    Log.e(TAG, null, error)
+                    Debug.sendErrorException(TAG, error)
                 }
             }
         }

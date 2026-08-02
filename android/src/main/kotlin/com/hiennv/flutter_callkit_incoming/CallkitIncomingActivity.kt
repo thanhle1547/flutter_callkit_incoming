@@ -38,7 +38,6 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
-import android.util.Log
 
 class CallkitIncomingActivity : Activity() {
 
@@ -369,7 +368,7 @@ class CallkitIncomingActivity : Activity() {
 
 
     private fun onAcceptClick() {
-        // Log.d("CallkitIncomingActivity", "[CALLKIT] 📱 onAcceptClick")
+        // Debug.sendDebugLog("CallkitIncomingActivity", "[CALLKIT] 📱 onAcceptClick")
         val data = intent.extras?.getBundle(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
 
 
@@ -396,7 +395,7 @@ class CallkitIncomingActivity : Activity() {
     }
 
     private fun onDeclineClick() {
-        // Log.d("CallkitIncomingActivity", "[CALLKIT] 📱 onDeclineClick")
+        // Debug.sendDebugLog("CallkitIncomingActivity", "[CALLKIT] 📱 onDeclineClick")
         val data = intent.extras?.getBundle(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
 
         val intent =

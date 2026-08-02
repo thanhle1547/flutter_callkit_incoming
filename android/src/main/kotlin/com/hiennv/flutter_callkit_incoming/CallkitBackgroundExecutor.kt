@@ -1,7 +1,6 @@
 package com.hiennv.flutter_callkit_incoming
 
 import android.content.Context
-import android.util.Log
 import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
@@ -23,7 +22,7 @@ object CallkitBackgroundExecutor {
 
     fun start(context: Context, pluginCallbackHandle: Long) {
         if (backgroundFlutterEngine != null) {
-            Log.d(TAG, "Background engine already running")
+            Debug.sendDebugLog(TAG, "Background engine already running")
             return
         }
 
@@ -50,12 +49,12 @@ object CallkitBackgroundExecutor {
             CHANNEL
         )
 
-        Log.d(TAG, "Background engine started")
+        Debug.sendDebugLog(TAG, "Background engine started")
     }
 
     fun send(event: String, body: Map<String, Any?>) {
         if (backgroundFlutterEngine == null) {
-            Log.e(TAG, "Background engine not started, cannot send event: $event")
+            Debug.sendErrorLog(TAG, "Background engine not started, cannot send event: $event")
             return
         }
         backgroundChannel!!.invokeMethod(event, body)
