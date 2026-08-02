@@ -165,6 +165,12 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
 
         }
 
+        fun allCalls(context: Context? = null) : ArrayList<Data> {
+            val effectiveContext = context ?: instance.context
+            val calls = getDataActiveCalls(effectiveContext)
+            return calls
+        }
+
     }
 
     /// The MethodChannel that will the communication between Flutter and native Android
@@ -213,11 +219,6 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 data.toBundle()
             )
         )
-    }
-
-    public fun allCalls() : ArrayList<Data> {
-        val calls = getDataActiveCalls(context)
-        return calls
     }
 
     public fun endCall(data: Data) {
