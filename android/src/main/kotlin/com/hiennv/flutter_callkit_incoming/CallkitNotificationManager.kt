@@ -672,7 +672,7 @@ class CallkitNotificationManager(
                     ) else textCalling
                 )
                 notificationOngoingBuilder?.setStyle(callStyle)
-
+                notificationOngoingBuilder?.setRequestPromotedOngoing(true)
 
                 val isShowCallID =
                     data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
