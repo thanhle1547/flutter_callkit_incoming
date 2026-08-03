@@ -849,7 +849,35 @@ class CallkitNotificationManager(
         notificationOngoingBuilder?.setOngoing(true)
         val notification = notificationOngoingBuilder?.build()
 
-        return notification?.let { CallkitNotification(onGoingNotificationId, it) }
+        return notification?.let {
+            if (isCustomNotification) {
+                if (Build.VERSION.SDK_INT >= 36) {
+                    // When we use NotificationCompat.CallStyle.forOngoingCall(),
+                    // the androidx wrapper puts the template name in EXTRA_COMPAT_TEMPLATE
+                    // ("androidx.core.app.extra.COMPAT_TEMPLATE") on older API levels,
+                    // but may not set EXTRA_CALL_TYPE to CALL_TYPE_ONGOING.
+                    // SystemUI checks EXTRA_TEMPLATE (the platform template key),
+                    // which might not match "android.app.Notification.CallStyle" in some edge cases.
+
+                    // from OngoingCallController.kt in AOSP
+                    //
+                    // SystemUI's OngoingCallController checks these two extras:
+                    //   1. EXTRA_TEMPLATE must be "android.app.Notification.CallStyle"
+                    //   2. EXTRA_CALL_TYPE must be CALL_TYPE_ONGOING (value 2)
+                    // we set them explicitly as a fallback
+                    notification.extras.putInt(
+                        Notification.EXTRA_CALL_TYPE,
+                        Notification.CallStyle.CALL_TYPE_ONGOING
+                    )
+                    notification.extras.putString(
+                        Notification.EXTRA_TEMPLATE,
+                        "android.app.Notification.CallStyle"
+                    )
+                }
+            }
+
+            CallkitNotification(onGoingNotificationId, it)
+        }
     }
 
     fun clearIncomingNotification(data: Bundle, isAccepted: Boolean) {
