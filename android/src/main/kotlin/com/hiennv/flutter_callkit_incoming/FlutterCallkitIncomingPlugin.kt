@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.NonNull
-import com.hiennv.flutter_callkit_incoming.Utils.Companion.reapCollection
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -16,6 +15,8 @@ import io.flutter.plugin.common.*
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.lang.ref.WeakReference
+import java.util.Collections
+import java.util.WeakHashMap
 
 
 /** FlutterCallkitIncomingPlugin */
@@ -45,7 +46,10 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         private val methodChannels = mutableMapOf<BinaryMessenger, MethodChannel>()
         private val eventChannels = mutableMapOf<BinaryMessenger, EventChannel>()
         private val eventHandlers = mutableMapOf<BinaryMessenger, EventCallbackHandler>()
-        private val eventCallbacks = mutableListOf<WeakReference<CallkitEventCallback>>()
+        // Uses a thread-safe, weak Set where elements are unique by object identity
+        private val eventCallbacks: MutableSet<CallkitEventCallback> = Collections.newSetFromMap(
+            WeakHashMap()
+        )
 
         private val eventQueue = ArrayList<Pair<String, Map<String, Any?>>>()
 
@@ -98,16 +102,18 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
          * Register a callback to receive call events (accept/decline) natively.
          * This allows other plugins/services to handle call events
          * even when Flutter engine is terminated.
+         *
+         * Returns false if already present
          */
-        fun registerEventCallback(callback: CallkitEventCallback) {
-            eventCallbacks.add(WeakReference(callback))
+        fun registerEventCallback(callback: CallkitEventCallback): Boolean {
+            return eventCallbacks.add(callback)
         }
 
         /**
          * Unregister an event callback.
          */
         fun unregisterEventCallback(callback: CallkitEventCallback) {
-            eventCallbacks.removeAll { it.get() == callback || it.get() == null }
+            eventCallbacks.remove(callback)
         }
 
         /**
@@ -115,8 +121,9 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
          * Called internally when a call event occurs.
          */
         internal fun notifyEventCallbacks(event: CallkitEventCallback.CallEvent, callData: android.os.Bundle) {
-            eventCallbacks.reapCollection().forEach { callbackRef ->
-                callbackRef.get()?.onCallEvent(event, callData)
+            // toList() snapshots to avoid ConcurrentModificationException
+            eventCallbacks.toList().forEach {
+                it.onCallEvent(event, callData)
             }
         }
 

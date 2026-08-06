@@ -72,13 +72,6 @@ class Utils {
             context.startActivity(intent)
         }
 
-        fun <T, C : MutableCollection<WeakReference<T>>> C.reapCollection(): C {
-            this.removeAll {
-                it.get() == null
-            }
-            return this
-        }
-
         fun isTablet(context: Context): Boolean {
             return context.resources.getBoolean(R.bool.isTablet)
         }
