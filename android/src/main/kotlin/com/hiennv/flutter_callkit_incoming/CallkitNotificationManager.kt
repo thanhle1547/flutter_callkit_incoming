@@ -672,7 +672,26 @@ class CallkitNotificationManager(
                     ) else textCalling
                 )
                 notificationOngoingBuilder?.setStyle(callStyle)
-                notificationOngoingBuilder?.setRequestPromotedOngoing(true)
+
+                if (Build.VERSION.SDK_INT >= 36) {
+                    // Live update notifications
+                    //
+                    // The requirements include:
+                    // - Must be CallStyle
+                    // - Must be ongoing (set FLAG_ONGOING_EVENT).
+                    // - Must have a contentTitle set.
+                    // - Must NOT have any customContentView set (no RemoteViews).
+                    // - Must NOT be the summary of a group using setGroupSummary.
+                    // - Must NOT setColorized to TRUE.
+                    // - The notification channel must NOT have IMPORTANCE_MIN.
+                    notificationOngoingBuilder?.setContentTitle(
+                        data.getString(
+                            CallkitConstants.EXTRA_CALLKIT_NAME_CALLER,
+                            ""
+                        )
+                    )
+                    notificationOngoingBuilder?.setRequestPromotedOngoing(true)
+                }
 
                 val isShowCallID =
                     data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
