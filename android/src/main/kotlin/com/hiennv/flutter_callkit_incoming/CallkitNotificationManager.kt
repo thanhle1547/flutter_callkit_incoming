@@ -201,7 +201,6 @@ class CallkitNotificationManager(
         notificationBuilder?.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         notificationBuilder?.setOngoing(true)
         notificationBuilder?.setAutoCancel(false)
-        notificationBuilder?.setWhen(System.currentTimeMillis())
         notificationBuilder?.setTimeoutAfter(
             data.getLong(
                 CallkitConstants.EXTRA_CALLKIT_DURATION, 0L
