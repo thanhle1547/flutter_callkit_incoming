@@ -49,6 +49,14 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                 `package` = context.packageName
             }
 
+        fun getIntentUpdate(context: Context, data: Bundle?) =
+            Intent().apply {
+                setClassName(context.packageName, "com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver")
+                action = "${context.packageName}.${CallkitConstants.ACTION_CALL_UPDATE}"
+                putExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA, data)
+                `package` = context.packageName
+            }
+
         fun getIntentDecline(context: Context, data: Bundle?) =
             Intent().apply {
                 setClassName(context.packageName, "com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver")
@@ -232,6 +240,17 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                 } catch (error: Exception) {
                     Debug.sendErrorException(TAG, error)
                 }
+            }
+
+            "${context.packageName}.${CallkitConstants.ACTION_CALL_UPDATE}" -> {
+                getCallkitNotificationManager()?.showIncomingNotification(data)
+                addCall(
+                    context,
+                    Data.fromBundle(data),
+                    isAccepted = false,
+                    ignoreIfNotExisted = true,
+                    preferAccepted = true
+                )
             }
 
             "${context.packageName}.${CallkitConstants.ACTION_CALL_DECLINE}" -> {

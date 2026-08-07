@@ -349,6 +349,37 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                     result.success(true)
                 }
 
+                "updateCallerName" -> {
+                    val args = call.arguments as Map<*, *>
+                    val notificationId = args["id"] as String
+                    val nameCaller = args["nameCaller"] as String
+
+                    val calls = getDataActiveCalls(context)
+                    val currentCall = calls.firstOrNull { it.id == notificationId }
+
+                    if (currentCall != null && context != null) {
+                        currentCall.nameCaller = nameCaller
+
+                        if (currentCall.isAccepted) {
+                            context?.sendBroadcast(
+                                CallkitIncomingBroadcastReceiver.getIntentConnected(
+                                    requireNotNull(context),
+                                    currentCall.toBundle()
+                                )
+                            )
+                        } else {
+                            context?.sendBroadcast(
+                                CallkitIncomingBroadcastReceiver.getIntentUpdate(
+                                    requireNotNull(context),
+                                    currentCall.toBundle()
+                                )
+                            )
+                        }
+                    }
+
+                    result.success(true)
+                }
+
                 "endCall" -> {
                     val calls = getDataActiveCalls(context)
                     val data = Data(call.arguments() ?: HashMap())

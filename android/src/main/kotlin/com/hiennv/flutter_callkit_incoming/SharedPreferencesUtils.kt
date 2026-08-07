@@ -19,15 +19,34 @@ fun addBackgroundCallback(context: Context?, pluginHandler: Long, userHandle: Lo
     putLong(context, "CALLBACK_USER_HANDLE", userHandle)
 }
 
-fun addCall(context: Context?, data: Data, isAccepted: Boolean = false) {
+fun addCall(
+    context: Context?,
+    data: Data,
+    isAccepted: Boolean = false,
+    ignoreIfNotExisted: Boolean = false,
+    preferAccepted: Boolean = false
+) {
     val json = getString(context, "ACTIVE_CALLS", "[]")
     val arrayData: ArrayList<Data> = Utils.getGsonInstance()
         .readValue(json, object : TypeReference<ArrayList<Data>>() {})
     val currentData = arrayData.find { it == data }
     if(currentData != null) {
-        currentData.isAccepted = isAccepted
-    }else {
-        data.isAccepted = isAccepted
+        val useIsAccepted = !preferAccepted || !currentData.isAccepted
+        if (useIsAccepted) {
+            currentData.isAccepted = isAccepted
+        }
+
+        currentData.nameCaller = data.nameCaller
+    } else {
+        if (ignoreIfNotExisted) {
+            return
+        }
+
+        val useIsAccepted = !preferAccepted || !data.isAccepted
+        if (useIsAccepted) {
+            data.isAccepted = isAccepted
+        }
+
         arrayData.add(data)
     }
     putString(context, "ACTIVE_CALLS", Utils.getGsonInstance().writeValueAsString(arrayData))
